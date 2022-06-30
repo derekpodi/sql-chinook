@@ -1,4 +1,4 @@
 # sql-chinook
 
 
-Sql queries to use with [Chinook Database](https://github.com/lerocha/chinook-database). 
+Sql queries for testing off the sample [Chinook Database](https://github.com/lerocha/chinook-database). 
