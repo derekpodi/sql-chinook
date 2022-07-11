@@ -13,9 +13,9 @@ WHERE Name LIKE '%&%'
 --2
 SELECT
     CONCAT(FirstName, ' ', LastName) AS FullName
-    ,DAY(BirthDate) AS Day
-    ,DATENAME(month, BirthDate) AS Month
-    ,YEAR(BirthDate) AS Year
+    ,DAY(BirthDate) AS [Day]
+    ,DATENAME(MONTH, BirthDate) AS [Month]
+    ,YEAR(BirthDate) AS [Year]
 FROM Employee
 
 
@@ -25,7 +25,7 @@ SELECT
     ,UPPER(Title) AS TitleUpperCase
     ,REVERSE(Title) AS TitleReverse
     ,LEN(Title) AS TitleLength
-    ,CHARINDEX(' ', Title) AS SpaceLocation
+    ,PATINDEX('% %',Title) AS SpaceLocation 
 FROM Album
 
 
@@ -34,7 +34,8 @@ SELECT
     FirstName
     ,LastName
     ,BirthDate
-    ,DATEDIFF(day, Birthdate,GETDATE())/365 AS Age
+    --,DATEDIFF(DAY, Birthdate,GETDATE())/365 AS Age    --My original answer
+    ,DATEDIFF(HOUR,BirthDate,GETDATE())/8766 AS Age
 FROM Employee
 
 
@@ -49,7 +50,7 @@ FROM Employee
 SELECT
     FirstName
     ,LastName
-    ,CONCAT(Left(TRIM(FirstName),1), Left(TRIM(LastName), 1)) AS Initials
+    ,CONCAT(Left(FirstName,1), Left(LastName, 1)) AS Initials
 FROM Customer
 ORDER BY Initials
 
@@ -58,7 +59,6 @@ ORDER BY Initials
 SELECT 
     FirstName
     ,LastName
-    --,CONCAT(FirstName, ' ', LastName) AS Name
     ,TRIM(REPLACE(REPLACE(Phone, '+1', ''), '-', ' ')) AS Phone
     ,ISNULL(TRIM(REPLACE(REPLACE(Fax,'+1', ''), '-', ' ')), 'Unknown') AS Fax
 FROM Customer
@@ -72,6 +72,7 @@ SELECT
     ,ISNULL(Company,'N/A') AS Company
 FROM Customer
 WHERE LastName LIKE '[A-M]%'
+ORDER BY CustomerName
 
 
 --9
@@ -80,17 +81,19 @@ SELECT
     ,CustomerId
     ,Total
     ,CONVERT(date, InvoiceDate) AS InvoiceDate
-    ,CONCAT('FY', IIF(MONTH(InvoiceDate) <= 6, YEAR(InvoiceDate), YEAR(InvoiceDate)+1)) AS FiscalYear
+    --,CONCAT('FY', IIF(MONTH(InvoiceDate) <= 6, YEAR(InvoiceDate), YEAR(InvoiceDate)+1)) AS FiscalYear     --My original answer
+    ,CONCAT('FY',YEAR(DATEADD(MONTH,6,InvoiceDate))) AS FiscalYear 
 FROM Invoice
 ORDER BY InvoiceDate DESC
 
 
 --10
 SELECT 
-    IIF(Country = 'USA' OR Country = 'Canada', 'Domestic', 'International') AS CustomerType
+    IIF(Country IN('USA','Canada'),'Domestic','International') AS CustomerType 
     ,FirstName
     ,LastName
     ,Country
 FROM Customer
 ORDER BY CustomerType, LastName 
+
 
