@@ -10,9 +10,7 @@ FROM Artist A
 JOIN Album Al
     ON Al.ArtistId = A.ArtistId
 WHERE A.Name LIKE '[A-D]%'
---    AND A.ArtistId IN(
---        SELECT ArtistId
---        FROM Album)
+
 ORDER BY ArtistName, AlbumTitle 
 
 
