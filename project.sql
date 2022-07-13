@@ -85,7 +85,7 @@ WHERE I.InvoiceDate BETWEEN '7/1/2011' AND '6/30/2012'
 ORDER BY I.Total DESC
 
 
--- CLEAN ANSWER -- 
+-- #1 CLEAN WORKING ANSWER  -- 
 
 SELECT TOP (10) WITH TIES
     A.Name AS [Artist Name]
