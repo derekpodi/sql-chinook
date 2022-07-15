@@ -185,7 +185,7 @@ ORDER BY [Employee Name], [Calendar Year], [Sales Quarter]
 
 
 
-
+-- NOT FINISHED/CORRRECT ... YET --
 SELECT
     CONCAT(E.FirstName, ' ', E.LastName) AS [Employee Name]
     ,YEAR(I.InvoiceDate) AS [Calendar Year]
