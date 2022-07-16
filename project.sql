@@ -130,6 +130,8 @@ ORDER BY [Employee Name],[Calendar Year], [Sales Quarter]
 
 
 -- HELPER QUERIES --
+
+--Implement Month Buckets with Names --
 SELECT
     CONCAT(E.FirstName, ' ', E.LastName) AS [Employee Name]
     ,YEAR(I.InvoiceDate) AS [Calendar Year]
