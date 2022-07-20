@@ -204,5 +204,3 @@ GROUP BY E.LastName, E.FirstName, I.InvoiceDate
 ORDER BY [Employee Name], [Calendar Year], [Sales Quarter]
 
 
--- Try Union of Multiple Select Statements; match datatypes when combining columns --
-
