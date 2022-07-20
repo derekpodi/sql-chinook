@@ -204,3 +204,30 @@ GROUP BY E.LastName, E.FirstName, I.InvoiceDate
 ORDER BY [Employee Name], [Calendar Year], [Sales Quarter]
 
 
+
+-- Cleaner Quarter Cases
+
+SELECT
+    CONCAT(E.FirstName, ' ', E.LastName) AS [Employee Name]
+    ,YEAR(I.InvoiceDate) AS [Calendar Year]
+    ,CASE 
+        WHEN DATENAME(quarter,I.InvoiceDate) = 1
+            THEN 'First'
+        WHEN DATENAME(quarter,I.InvoiceDate) = 2            
+            THEN 'Second'
+        WHEN DATENAME(quarter,I.InvoiceDate) = 3
+            THEN 'Third'
+        ELSE
+            'Fourth'
+    END AS [Sales Quarter]
+    --,MAX(I.Total) AS [Highest Sale]
+    --,COUNT(C.SupportRepId) AS [Number of Sales]
+    --,SUM(I.Total) AS [Total Sales]
+FROM Employee E
+JOIN Customer C
+    ON C.SupportRepId = E.EmployeeId
+JOIN Invoice I
+    ON I.CustomerId = C.CustomerId
+WHERE E.Title = 'Sales Support Agent'
+    AND I.InvoiceDate BETWEEN '1/1/2010' AND '6/30/2012'
+ORDER BY [Employee Name], [Calendar Year], DATENAME(quarter,I.InvoiceDate)
