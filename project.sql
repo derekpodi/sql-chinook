@@ -231,3 +231,16 @@ JOIN Invoice I
 WHERE E.Title = 'Sales Support Agent'
     AND I.InvoiceDate BETWEEN '1/1/2010' AND '6/30/2012'
 ORDER BY [Employee Name], [Calendar Year], DATENAME(quarter,I.InvoiceDate)
+
+
+
+
+--3
+SELECT *
+FROM Playlist
+
+SELECT *
+FROM PlaylistTrack
+
+SELECT DISTINCT P.Name
+FROM Playlist P
