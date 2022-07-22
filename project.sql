@@ -242,5 +242,16 @@ FROM Playlist
 SELECT *
 FROM PlaylistTrack
 
-SELECT DISTINCT P.Name
+-- Playlist ID and Name with no TrackIDs --
+SELECT * --DISTINCT 
+    --P.Name
+    --P.PlaylistId
+    --PT.TrackId
 FROM Playlist P
+--JOIN PlaylistTrack PT
+--    ON PT.PlaylistId = P.PlaylistId
+WHERE P.PlaylistId NOT IN (
+    SELECT 
+        PT.PlaylistId
+    FROM PlaylistTrack PT
+)
