@@ -265,3 +265,21 @@ FROM Playlist P
 GROUP BY Name
 ORDER BY Name
 
+
+
+--  Write a report that displays the duplicate Playlist IDs and Playlist Names, as well as any associated Track IDs if they exist. 
+SELECT
+    P.Name
+    ,P.PlaylistId
+    ,PT.TrackId
+FROM Playlist P
+JOIN PlaylistTrack PT
+    ON PT.PlaylistId = P.PlaylistId
+WHERE P.Name IN (
+    SELECT P.Name
+    FROM Playlist P
+    GROUP BY P.Name
+    HAVING COUNT(P.Name) > 1
+)
+GROUP BY P.Name, P.PlaylistId, PT.TrackId
+ORDER BY P.PlaylistId, PT.TrackId
