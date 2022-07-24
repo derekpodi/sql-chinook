@@ -268,6 +268,7 @@ ORDER BY Name
 
 
 --  Write a report that displays the duplicate Playlist IDs and Playlist Names, as well as any associated Track IDs if they exist. 
+-- NOT FINISHED/CORRRECT ... YET --
 SELECT
     P.Name
     ,P.PlaylistId
@@ -283,3 +284,36 @@ WHERE P.Name IN (
 )
 GROUP BY P.Name, P.PlaylistId, PT.TrackId
 ORDER BY P.PlaylistId, PT.TrackId
+
+
+
+
+
+
+
+--4
+SELECT
+    C.Country
+    ,A.Name
+    --COUNT(IL.Quantity)
+    --UNIQUE(IL.TrackId)
+    --COUNT(IL.Quantity) - UNIQUE(IL.TrackId)
+    --SUM(I.Total)
+    --M.Name
+FROM Customer C
+JOIN Invoice I
+    ON I.CustomerId = C.CustomerId
+JOIN InvoiceLine IL
+    ON IL.InvoiceId = I.InvoiceId
+JOIN Track T
+    ON T.TrackId = IL.TrackId
+JOIN MediaType M 
+    ON M.MediaTypeId = T.MediaTypeId
+JOIN Album AL
+    ON AL.AlbumId = T.AlbumId
+JOIN Artist A
+    ON A.ArtistId = AL.ArtistId
+WHERE I.InvoiceDate BETWEEN '7/1/2009' AND '6/30/2013'
+
+
+
