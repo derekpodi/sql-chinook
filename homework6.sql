@@ -40,9 +40,6 @@ EXEC sp_rename 'Users.CustomerId', 'UserId', 'COLUMN'
 
 
 --6
---ALTER TABLE Users
---DROP CONSTRAINT pk_Users
-
 ALTER TABLE Users
 ADD CONSTRAINT pk_Users PRIMARY KEY (UserId)
 
