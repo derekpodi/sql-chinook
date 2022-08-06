@@ -266,26 +266,23 @@ GROUP BY Name
 ORDER BY Name
 
 
-
 --  Write a report that displays the duplicate Playlist IDs and Playlist Names, as well as any associated Track IDs if they exist. 
--- NOT FINISHED/CORRRECT ... YET --
+-- #3 CLEAN WORKING ANSWER  -- 
 SELECT
-    P.Name
-    ,P.PlaylistId
-    ,PT.TrackId
+    P.Name AS [Playlist Name]
+    ,P.PlaylistId AS [Playlist ID]
+    ,PT.TrackId AS [Track ID]
 FROM Playlist P
-JOIN PlaylistTrack PT
+LEFT JOIN PlaylistTrack PT
     ON PT.PlaylistId = P.PlaylistId
 WHERE P.Name IN (
     SELECT P.Name
     FROM Playlist P
     GROUP BY P.Name
     HAVING COUNT(P.Name) > 1
-)
+) AND P.PlaylistId > 5                          --first duplicate in playlist at id 6
 GROUP BY P.Name, P.PlaylistId, PT.TrackId
 ORDER BY P.PlaylistId, PT.TrackId
-
-
 
 
 
@@ -296,11 +293,11 @@ ORDER BY P.PlaylistId, PT.TrackId
 SELECT
     C.Country
     ,A.Name
-    --COUNT(IL.Quantity)
-    --UNIQUE(IL.TrackId)
-    --COUNT(IL.Quantity) - UNIQUE(IL.TrackId)
-    --SUM(I.Total)
-    --M.Name
+    ,COUNT(IL.Quantity)
+    --,UNIQUE(IL.TrackId)
+    --,COUNT(IL.Quantity) - UNIQUE(IL.TrackId)
+    ,SUM(I.Total)
+    ,M.Name
 FROM Customer C
 JOIN Invoice I
     ON I.CustomerId = C.CustomerId
@@ -315,7 +312,8 @@ JOIN Album AL
 JOIN Artist A
     ON A.ArtistId = AL.ArtistId
 WHERE I.InvoiceDate BETWEEN '7/1/2009' AND '6/30/2013'
-
+GROUP BY C.Country, A.Name, M.Name
+ORDER BY C.Country
 
 
 
