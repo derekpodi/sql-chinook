@@ -18,7 +18,6 @@ USE MyDB_DerekPodimatis
 SELECT *
 INTO Users
 FROM Chinook.dbo.Customer
-USE MyDB_DerekPodimatis
 
 
 --3
