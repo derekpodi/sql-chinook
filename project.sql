@@ -289,15 +289,15 @@ ORDER BY P.PlaylistId, PT.TrackId
 
 
 --4
---Incorrect for now, add group by correctly
+--Incorrect count difference, add group by correctly
 SELECT
     C.Country
-    ,A.Name
-    ,COUNT(IL.Quantity)
-    --,UNIQUE(IL.TrackId)
-    --,COUNT(IL.Quantity) - UNIQUE(IL.TrackId)
-    ,SUM(I.Total)
-    ,M.Name
+    ,A.Name AS [Artist Name]
+    ,COUNT(IL.TrackId) AS [Track Count]
+    ,COUNT(DISTINCT IL.TrackId) AS [Unique Track Count]
+    ,COUNT(IL.TrackId) - COUNT(DISTINCT IL.TrackId) AS [Count Difference]
+    ,T.UnitPrice * COUNT(IL.Quantity) AS [Total Revenue]
+    ,IIF(M.MediaTypeId =3, 'Video', 'Audio') AS [Media Type]
 FROM Customer C
 JOIN Invoice I
     ON I.CustomerId = C.CustomerId
@@ -312,11 +312,33 @@ JOIN Album AL
 JOIN Artist A
     ON A.ArtistId = AL.ArtistId
 WHERE I.InvoiceDate BETWEEN '7/1/2009' AND '6/30/2013'
-GROUP BY C.Country, A.Name, M.Name
-ORDER BY C.Country
+GROUP BY C.Country, A.Name, M.MediaTypeId, T.UnitPrice
+--HAVING COUNT(IL.Quantity) - COUNT(DISTINCT IL.TrackId) > 0
+ORDER BY C.Country, [Track Count] DESC, A.Name
+
 
 
 
 
 
 --5
+SELECT
+    CONCAT(E.FirstName, ' ', E.LastName) AS [Full Name]
+    ,CONVERT(varchar, E.BirthDate, 101) AS [Birth Date]
+    ,CONVERT(varchar, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date), 101) AS [Birth Day 2016]
+    ,DATENAME(WEEKDAY, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date)) AS [Birth Day of Week]
+    ,CASE
+        WHEN DATENAME(WEEKDAY, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date)) = 'Saturday' 
+            THEN CONVERT(varchar, DATEADD(DAY, 2, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date)), 101)
+        WHEN DATENAME(WEEKDAY, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date)) = 'Sunday' 
+            THEN CONVERT(varchar, DATEADD(DAY, 1, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date)), 101)
+        ELSE CONVERT(varchar, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date), 101)
+        END AS [Celebration Date]
+    ,CASE
+        WHEN DATENAME(WEEKDAY, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date)) = 'Saturday' 
+            THEN DATENAME(WEEKDAY, CONVERT(varchar, DATEADD(DAY, 2, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date)), 101))
+        WHEN DATENAME(WEEKDAY, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date)) = 'Sunday' 
+            THEN DATENAME(WEEKDAY, CONVERT(varchar, DATEADD(DAY, 1, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date)), 101))
+        ELSE DATENAME(WEEKDAY, CONVERT(varchar, CAST(CONCAT(MONTH(E.BirthDate),'/',DAY(E.BirthDate),'/','2016') AS date), 101))
+        END AS [Celebration Day of Week]
+FROM Employee E
