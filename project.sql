@@ -293,10 +293,10 @@ ORDER BY P.PlaylistId, PT.TrackId
 SELECT
     C.Country
     ,A.Name AS [Artist Name]
-    ,COUNT(IL.TrackId) AS [Track Count]
+    ,COUNT(*) AS [Track Count]
     ,COUNT(DISTINCT IL.TrackId) AS [Unique Track Count]
-    ,COUNT(IL.TrackId) - COUNT(DISTINCT IL.TrackId) AS [Count Difference]
-    ,T.UnitPrice * COUNT(IL.Quantity) AS [Total Revenue]
+    ,COUNT(*) - COUNT(DISTINCT IL.TrackId) AS [Count Difference]
+    ,T.UnitPrice * COUNT(*) AS [Total Revenue]
     ,IIF(M.MediaTypeId =3, 'Video', 'Audio') AS [Media Type]
 FROM Customer C
 JOIN Invoice I
@@ -312,12 +312,17 @@ JOIN Album AL
 JOIN Artist A
     ON A.ArtistId = AL.ArtistId
 WHERE I.InvoiceDate BETWEEN '7/1/2009' AND '6/30/2013'
+    --AND C.Country = 'USA'   --Count Check
 GROUP BY C.Country, A.Name, M.MediaTypeId, T.UnitPrice
---HAVING COUNT(IL.Quantity) - COUNT(DISTINCT IL.TrackId) > 0
+HAVING COUNT(IL.Quantity) - COUNT(DISTINCT IL.TrackId) > 0
 ORDER BY C.Country, [Track Count] DESC, A.Name
 
 
+SELECT *
+FROM InvoiceLine
 
+SELECT *
+FROM Invoice
 
 
 
