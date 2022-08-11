@@ -291,11 +291,11 @@ ORDER BY P.PlaylistId, PT.TrackId
 --4
 --Incorrect count difference, add group by correctly
 SELECT
-    C.Country
+    C.Country AS Country
     ,A.Name AS [Artist Name]
-    ,COUNT(*) AS [Track Count]
+    ,COUNT(IL.TrackId) AS [Track Count]
     ,COUNT(DISTINCT IL.TrackId) AS [Unique Track Count]
-    ,COUNT(*) - COUNT(DISTINCT IL.TrackId) AS [Count Difference]
+    ,COUNT(IL.TrackId) - COUNT(DISTINCT IL.TrackId) AS [Count Difference]
     ,T.UnitPrice * COUNT(*) AS [Total Revenue]
     ,IIF(M.MediaTypeId =3, 'Video', 'Audio') AS [Media Type]
 FROM Customer C
@@ -323,6 +323,31 @@ FROM InvoiceLine
 
 SELECT *
 FROM Invoice
+
+
+SELECT 
+    I.BillingCountry AS Country
+    ,A.Name AS [Artist Name]
+    ,COUNT(*) AS [Track Count]
+    ,COUNT(DISTINCT T.TrackId) --* IL.Quantity AS [Unique Track Count]
+    --,COUNT(IL.InvoiceLineId) - COUNT(DISTINCT IL.TrackId) AS [Count Difference]
+    --,(T.UnitPrice * COUNT(IL.Quantity)) AS [Total Revenue]
+    --,IIF(MT.MediaTypeId = 3, 'Video', 'Audio') AS [Media Type]
+FROM Invoice I
+JOIN InvoiceLine IL
+    ON IL.InvoiceId = I.InvoiceId
+JOIN Track T
+    ON T.TrackId = IL.TrackId
+JOIN Album AL
+    ON AL.AlbumId = T.AlbumId
+JOIN Artist A
+    ON A.ArtistId = AL.ArtistId
+JOIN MediaType MT
+    ON MT.MediaTypeId = T.MediaTypeId
+WHERE I.InvoiceDate BETWEEN '7/1/2009' AND '6/30/2013'
+GROUP BY I.BillingCountry, A.Name--, T.UnitPrice, MT.MediaTypeId, IL.Quantity
+--HAVING COUNT(IL.InvoiceLineId) - (COUNT(DISTINCT IL.TrackId) * IL.Quantity) > 0
+ORDER BY I.BillingCountry, [Track Count] DESC, A.Name
 
 
 
