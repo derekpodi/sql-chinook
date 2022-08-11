@@ -325,15 +325,19 @@ SELECT *
 FROM Invoice
 
 
+
+--#4 More Correct Working Version
 SELECT 
-    I.BillingCountry AS Country
+    C.Country AS Country
     ,A.Name AS [Artist Name]
-    ,COUNT(*) AS [Track Count]
-    ,COUNT(DISTINCT T.TrackId) --* IL.Quantity AS [Unique Track Count]
-    --,COUNT(IL.InvoiceLineId) - COUNT(DISTINCT IL.TrackId) AS [Count Difference]
-    --,(T.UnitPrice * COUNT(IL.Quantity)) AS [Total Revenue]
-    --,IIF(MT.MediaTypeId = 3, 'Video', 'Audio') AS [Media Type]
-FROM Invoice I
+    ,COUNT(T.Name) AS [Track Count]
+    ,COUNT(DISTINCT T.Name) AS [Unique Track Count]
+    ,COUNT(T.Name) - COUNT(DISTINCT T.Name) AS [Count Difference]
+    ,T.UnitPrice * COUNT(*) AS [Total Revenue]
+    --,IIF(T.MediaTypeId =3, 'Video', 'Audio') AS [Media Type]
+FROM Customer C
+JOIN Invoice I
+    ON I.CustomerId = C.CustomerId
 JOIN InvoiceLine IL
     ON IL.InvoiceId = I.InvoiceId
 JOIN Track T
@@ -342,12 +346,13 @@ JOIN Album AL
     ON AL.AlbumId = T.AlbumId
 JOIN Artist A
     ON A.ArtistId = AL.ArtistId
-JOIN MediaType MT
-    ON MT.MediaTypeId = T.MediaTypeId
 WHERE I.InvoiceDate BETWEEN '7/1/2009' AND '6/30/2013'
-GROUP BY I.BillingCountry, A.Name--, T.UnitPrice, MT.MediaTypeId, IL.Quantity
---HAVING COUNT(IL.InvoiceLineId) - (COUNT(DISTINCT IL.TrackId) * IL.Quantity) > 0
-ORDER BY I.BillingCountry, [Track Count] DESC, A.Name
+GROUP BY C.Country, A.Name, T.UnitPrice
+ORDER BY C.Country, [Track Count] DESC, A.Name
+
+
+
+
 
 
 
