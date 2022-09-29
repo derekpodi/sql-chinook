@@ -1,80 +1,80 @@
 --Derek Podimatis
 
 USE Chinook
+IF OBJECT_ID('Track_v_dp') IS NOT NULL DROP VIEW Track_v_dp
+IF OBJECT_ID('ArtistAlbum_fn_dp') IS NOT NULL DROP FUNCTION ArtistAlbum_fn_dp
+IF OBJECT_ID('TracksByArtist_p_dp') IS NOT NULL DROP PROC TracksByArtist_p_dp
+
+
+GO
 
 --1
+CREATE VIEW Track_v_dp AS
 SELECT
-    FirstName
-    ,LastName
-FROM Employee
-WHERE ReportsTo IS NOT NULL
+    T.*
+    ,G.Name AS GenreName
+    ,MT.Name AS MediaTypeName
+FROM Track T
+JOIN Genre G
+    ON G.GenreId = T.GenreId
+JOIN MediaType MT
+    ON MT.MediaTypeId = T.MediaTypeId
 
+/*
+SELECT *
+FROM Track_v_dp
+*/
+
+GO
 
 --2
-SELECT *
-FROM Customer
-WHERE State != 'CA'
-    OR State IS NULL
+CREATE FUNCTION ArtistAlbum_fn_dp (@TrackId int)
+RETURNS varchar(100)
+AS
+BEGIN
+DECLARE @ArtistAlbum varchar(100)
+SELECT
+    @ArtistAlbum = CONCAT(A.Name, '-', AL.Title)
+FROM Track T
+JOIN Album AL
+    ON AL.AlbumId = T.AlbumId
+JOIN Artist A
+    ON A.ArtistId = AL.ArtistId
+WHERE T.TrackId = @TrackId
+RETURN
+    @ArtistAlbum
+END
 
+/*
+SELECT
+    dbo.ArtistAlbum_fn_dp(TrackId)
+FROM Track
+*/
+
+GO
 
 --3
-SELECT *
-FROM Invoice
-WHERE InvoiceDate BETWEEN '4/1/2010' AND '5/1/2010'
+CREATE PROC TracksByArtist_p_dp @ArtistName varchar(100) AS
+SELECT
+    A.Name AS ArtistName
+    ,AL.Title AS AlbumTitle
+    ,T.Name AS TrackName
+FROM Artist A
+JOIN Album AL 
+    ON AL.ArtistId = A.ArtistId
+JOIN Track T
+    ON T.AlbumId = AL.AlbumId
+WHERE A.Name LIKE CONCAT(@ArtistName,'%')
 
+
+/*
+EXEC TracksByArtist_p_dp 'Bl'
+*/
+
+GO
 
 --4
-SELECT
-    Title
-    ,AlbumId
-FROM Album
-WHERE Title LIKE 'The%'
 
 
---5
-SELECT *
-FROM Album
-WHERE Title NOT LIKE '[A-Z]%'
 
 
---6
-SELECT
-    CustomerId
-    ,BillingCity
-    ,BillingCountry
-    ,InvoiceDate
-FROM Invoice
-WHERE BillingCountry IN ('Canada', 'Germany', 'France', 'Spain', 'India')
-ORDER BY InvoiceDate DESC
-
-
---7
-SELECT *
-FROM ALBUM
-WHERE ArtistId IN(
-    SELECT ArtistId
-    FROM Artist
-    WHERE Name LIKE '%Black%')
-
-
---8
-SELECT *
-FROM Track
-WHERE TrackId NOT IN(
-    SELECT TrackId
-    FROM InvoiceLine
-)
-
-
---9
-SELECT *
-FROM Track
-WHERE (MediaTypeId = 5 AND GenreId != 1)
-    OR Composer = 'Gene Simmons'
-
-
---10
-SELECT *
-FROM Track
-WHERE AlbumId = 237 
-    AND (Composer LIKE '%Dylan%' OR Composer LIKE '%Hendrix%')
