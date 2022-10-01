@@ -53,7 +53,7 @@ FROM Track
 
 GO
 
---3
+--3     --STILL INCORRECT
 CREATE PROC TracksByArtist_p_dp @ArtistName varchar(100) AS
 SELECT
     A.Name AS ArtistName
@@ -96,12 +96,11 @@ WHERE T.GenreName = 'Opera'
 
 GO
 
---6
+--6     --STILL INCORRECT;--Problem Number 3 is incorrect -> get 54 rows, 0 rows as is currently
 EXEC TracksByArtist_p_dp 'black'
 GO
 EXEC TracksByArtist_p_dp 'white'
 GO
---Problem Number 3 is incorrect -> get 54 rows, 0 rows as is currently
 
 
 --7
