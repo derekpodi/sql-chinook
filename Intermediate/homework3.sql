@@ -26,23 +26,23 @@ JOIN Track T
 
 --2
 SELECT
-    ArtistName
-    ,AlbumTitle
+    AA.ArtistName
+    ,AA.AlbumTitle
     ,T.Name AS TrackName
 FROM
 (
     SELECT
         A.ArtistId
-        ,A.NAME AS ArtistName
+        ,A.Name AS ArtistName
         ,AL.AlbumId
         ,AL.Title AS AlbumTitle
     FROM Artist A
-    JOIN ALBUM AL
+    JOIN Album AL
         ON AL.ArtistId = A.ArtistId
-    WHERE A.NAME = 'Kiss'
+    WHERE A.Name = 'Kiss'
 ) AS AA
 JOIN Track T
-    ON T.AlbumId = AA.AlbumId
+    ON T.AlbumId = AA.AlbumId;
 
 
 --3
@@ -55,16 +55,16 @@ SELECT
 FROM Customer C
 JOIN Invoice I
     ON I.CustomerId = C.CustomerId
-GROUP BY C.FirstName, C.LastName, C.SupportRepId
+GROUP BY CONCAT(C.FirstName, ' ', C.LastName), C.SupportRepId
 )
 SELECT
     E.LastName AS SupportRep
-    ,CustomerName
-    ,SumTotal
+    ,CustomerInvoice.CustomerName
+    ,CustomerInvoice.SumTotal
 FROM CustomerInvoice
 JOIN Employee E
     ON E.EmployeeId = CustomerInvoice.SupportRepId
-ORDER BY SumTotal DESC, SupportRep
+ORDER BY SumTotal DESC, LastName
 
 
 --4
@@ -76,71 +76,65 @@ SELECT
         FROM Track T
         WHERE T.AlbumId = AL.AlbumId
     ) AS TrackCount
-FROM Artist A
-JOIN Album AL 
-    ON AL.ArtistId = A.ArtistId
+FROM Album AL
+JOIN Artist A 
+    ON A.ArtistId = AL.ArtistId
 WHERE A.Name = 'Iron Maiden'
-ORDER BY TrackCount
+ORDER BY TrackCount;
 
 
 --5
-WITH TCount AS 
+WITH TC AS 
 (
 SELECT 
-    T.AlbumId
-    ,COUNT(*) AS TC
-FROM Track T
-JOIN Album AL 
-    ON AL.AlbumId = T.AlbumId
-WHERE T.AlbumId = AL.AlbumId
-GROUP BY T.AlbumId
+    AlbumId
+    ,COUNT(*) AS TrackCount
+FROM Track
+GROUP BY AlbumId
 )
 SELECT
     A.Name AS ArtistName
     ,AL.Title AS AlbumTitle
-    ,TC AS TrackCount
-FROM TCount
+    ,TC.TrackCount
+FROM Artist A
 JOIN Album AL
-    ON AL.AlbumId = TCount.AlbumId
-JOIN Artist A 
-    ON A.ArtistId = AL.ArtistId
+    ON AL.ArtistId = A.ArtistId
+JOIN TC 
+    ON TC.AlbumId = AL.AlbumId
 WHERE A.Name = 'U2'
-ORDER BY TrackCount
+ORDER BY TrackCount;
 
 
 --6
 WITH BD AS
 (
 SELECT
-    E.BirthDate
-    ,CONVERT(VARCHAR, DATEFROMPARTS(2021,MONTH(E.BirthDate),DAY(E.BirthDate)), 110 ) AS BirthDay2021
-FROM Employee E
+    CONCAT(FirstName, ' ', LastName) AS FullName
+    ,BirthDate
+    ,DATEFROMPARTS(2021,MONTH(BirthDate),DAY(BirthDate)) AS BirthDay2021
+FROM Employee
 )
 , CD AS
 (
 SELECT
-    E.BirthDate
+    FullName
+    ,BirthDate
+    ,BirthDay2021
     ,CASE
-        WHEN DATENAME(WEEKDAY, BD.BirthDay2021) = 'Saturday' THEN CONVERT(VARCHAR, DATEADD(day, 2, BD.BirthDay2021), 110)
-        WHEN DATENAME(WEEKDAY, BD.BirthDay2021) = 'Sunday' THEN CONVERT(VARCHAR, DATEADD(day, 1, BD.BirthDay2021), 110)
+        WHEN DATENAME(WEEKDAY, BD.BirthDay2021) = 'Saturday' THEN DATEADD(day, 2, BD.BirthDay2021)
+        WHEN DATENAME(WEEKDAY, BD.BirthDay2021) = 'Sunday' THEN DATEADD(day, 1, BD.BirthDay2021)
         ELSE BD.BirthDay2021 
         END AS CelebrationDate
-FROM Employee E
-JOIN BD 
-    ON BD.BirthDate = E.BirthDate
+FROM BD
 )
 SELECT
-    CONCAT(E.FirstName, ' ', E.LastName) AS FullName
-    ,CONVERT(VARCHAR, E.BirthDate, 110) AS BirthDate
-    ,BD.BirthDay2021
-    ,DATENAME(WEEKDAY, BD.BirthDay2021) AS BirthDayOfWeek2021
-    ,CD.CelebrationDate
+    FullName
+    ,CONVERT(VARCHAR, BirthDate, 110) AS BirthDate
+    ,CONVERT(VARCHAR, BirthDay2021, 110) AS BirthDay2021
+    ,DATENAME(WEEKDAY, BirthDay2021) AS BirthDayOfWeek2021
+    ,CONVERT(VARCHAR, CelebrationDate, 110) AS CelebrationDate
     ,DATENAME(WEEKDAY, CD.CelebrationDate) AS CelebrationDayOfWeek
-FROM Employee E
-JOIN BD
-    ON BD.BirthDate = E.BirthDate
-JOIN CD 
-    ON CD.BirthDate = E.BirthDate
+FROM CD
 
 
 
