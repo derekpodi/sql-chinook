@@ -1,22 +1,23 @@
 --Derek Podimatis
 
+USE Chinook;
 
 --1
 WITH AA AS
 (
 SELECT
     A.ArtistId
-    ,A.NAME AS ArtistName
+    ,A.Name AS ArtistName
     ,AL.AlbumId
     ,AL.Title AS AlbumTitle
 FROM Artist A
-JOIN ALBUM AL
+JOIN Album AL
     ON AL.ArtistId = A.ArtistId
-WHERE A.NAME = 'AudioSlave'
+WHERE A.Name = 'AudioSlave'
 )
 SELECT
-    ArtistName
-    ,AlbumTitle
+    AA.ArtistName
+    ,AA.AlbumTitle
     ,T.Name AS TrackName
 FROM AA
 JOIN Track T
@@ -142,4 +143,92 @@ JOIN CD
     ON CD.BirthDate = E.BirthDate
 
 
+
+/********************** Trigger Setup ****************************/
+GO
+USE master
+IF DB_ID('MyDB_dp') IS NOT NULL --Execute code below if the database exists.
+BEGIN
+    ALTER DATABASE MyDB_dp SET OFFLINE WITH ROLLBACK IMMEDIATE; --Removes connections to database.
+    ALTER DATABASE MyDB_dp SET ONLINE; --Return online so DROP command will succeed.
+    DROP DATABASE MyDB_dp; --Drop the database
+END
+CREATE DATABASE MyDB_dp
+GO
+USE MyDB_dp
+
+--Create sample table.
+SELECT *
+INTO Staff
+FROM Chinook.dbo.Employee
+
+--Create log table.
+SELECT
+    CAST('' AS varchar(20)) AS DMLType
+    ,sysdatetime() AS DateUpdated
+    ,SYSTEM_USER AS UpdatedBy
+    ,*
+INTO Staff_log
+FROM Chinook.dbo.Employee
+WHERE 1=2 --Table creation shortcut. By setting 1=2 the table gets created but no data is inserted.
+/****************************************************************/
+
+
 --7
+UPDATE Staff
+SET Title = 'New General Manager'
+OUTPUT inserted.EmployeeId, deleted.Title AS TitleBefore, inserted.Title AS TitleAfter
+WHERE FirstName = 'Nancy' AND LastName = 'Edwards'
+
+
+--8
+GO
+CREATE TRIGGER Staff_trg
+    ON Staff
+    AFTER UPDATE, DELETE
+    AS
+    INSERT INTO Staff_log(DMLType, DateUpdated, UpdatedBy, EmployeeId, LastName, FirstName, Title, ReportsTo, BirthDate, HireDate, Address, City, [State], Country, PostalCode, Phone, Fax, Email)
+    SELECT
+    CASE
+        WHEN EXISTS (SELECT * FROM deleted)
+            AND NOT EXISTS (SELECT * FROM inserted) THEN 'deleted'
+        ELSE 'inserted'
+        END
+    ,SYSDATETIME()
+    ,SYSTEM_USER
+    ,COALESCE(D.EmployeeId, I.EmployeeId)
+    ,COALESCE(D.LastName, I.LastName)
+    ,COALESCE(D.FirstName, I.FirstName)
+    ,COALESCE(D.Title, I.Title)
+    ,COALESCE(D.ReportsTo, I.ReportsTo)
+    ,COALESCE(D.BirthDate, I.BirthDate)
+    ,COALESCE(D.HireDate, I.HireDate)
+    ,COALESCE(D.Address, I.Address)
+    ,COALESCE(D.City, I.City)
+    ,COALESCE(D.State, I.State)
+    ,COALESCE(D.Country, I.Country)
+    ,COALESCE(D.PostalCode, I.PostalCode)
+    ,COALESCE(D.Phone, I.Phone)
+    ,COALESCE(D.Fax, I.Fax)
+    ,COALESCE(D.Email, I.Email)
+    FROM deleted D 
+    FULL JOIN inserted I
+        ON I.EmployeeId = D.EmployeeId
+
+
+--9
+DELETE Staff
+WHERE FirstName = 'Andrew' AND LastName = 'Adams'
+
+
+--10
+UPDATE Staff
+SET Title = 'New Sales Manager'
+WHERE FirstName = 'Jane' AND LastName = 'Peacock'
+
+--11
+SELECT *
+FROM Staff
+
+SELECT *
+FROM Staff_log
