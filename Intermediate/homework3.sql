@@ -121,9 +121,9 @@ SELECT
     ,BirthDate
     ,BirthDay2021
     ,CASE
-        WHEN DATENAME(WEEKDAY, BD.BirthDay2021) = 'Saturday' THEN DATEADD(day, 2, BD.BirthDay2021)
-        WHEN DATENAME(WEEKDAY, BD.BirthDay2021) = 'Sunday' THEN DATEADD(day, 1, BD.BirthDay2021)
-        ELSE BD.BirthDay2021 
+        WHEN DATENAME(WEEKDAY, BirthDay2021) = 'Saturday' THEN DATEADD(day, 2, BirthDay2021)
+        WHEN DATENAME(WEEKDAY, BirthDay2021) = 'Sunday' THEN DATEADD(day, 1, BirthDay2021)
+        ELSE BirthDay2021 
         END AS CelebrationDate
 FROM BD
 )
@@ -150,12 +150,10 @@ END
 CREATE DATABASE MyDB_dp
 GO
 USE MyDB_dp
-
 --Create sample table.
 SELECT *
 INTO Staff
 FROM Chinook.dbo.Employee
-
 --Create log table.
 SELECT
     CAST('' AS varchar(20)) AS DMLType
@@ -171,54 +169,34 @@ WHERE 1=2 --Table creation shortcut. By setting 1=2 the table gets created but n
 --7
 UPDATE Staff
 SET Title = 'New General Manager'
-OUTPUT inserted.EmployeeId, deleted.Title AS TitleBefore, inserted.Title AS TitleAfter
-WHERE FirstName = 'Nancy' AND LastName = 'Edwards'
+OUTPUT 
+    inserted.EmployeeId
+    ,deleted.Title AS TitleBefore
+    ,inserted.Title AS TitleAfter
+WHERE EmployeeId = 2
 
 
 --8
 GO
 CREATE TRIGGER Staff_trg
     ON Staff
-    AFTER UPDATE, DELETE
+    FOR UPDATE, DELETE
     AS
-    INSERT INTO Staff_log(DMLType, DateUpdated, UpdatedBy, EmployeeId, LastName, FirstName, Title, ReportsTo, BirthDate, HireDate, Address, City, [State], Country, PostalCode, Phone, Fax, Email)
-    SELECT
-    CASE
-        WHEN EXISTS (SELECT * FROM deleted)
-            AND NOT EXISTS (SELECT * FROM inserted) THEN 'deleted'
-        ELSE 'inserted'
-        END
-    ,SYSDATETIME()
-    ,SYSTEM_USER
-    ,COALESCE(D.EmployeeId, I.EmployeeId)
-    ,COALESCE(D.LastName, I.LastName)
-    ,COALESCE(D.FirstName, I.FirstName)
-    ,COALESCE(D.Title, I.Title)
-    ,COALESCE(D.ReportsTo, I.ReportsTo)
-    ,COALESCE(D.BirthDate, I.BirthDate)
-    ,COALESCE(D.HireDate, I.HireDate)
-    ,COALESCE(D.Address, I.Address)
-    ,COALESCE(D.City, I.City)
-    ,COALESCE(D.State, I.State)
-    ,COALESCE(D.Country, I.Country)
-    ,COALESCE(D.PostalCode, I.PostalCode)
-    ,COALESCE(D.Phone, I.Phone)
-    ,COALESCE(D.Fax, I.Fax)
-    ,COALESCE(D.Email, I.Email)
-    FROM deleted D 
-    FULL JOIN inserted I
-        ON I.EmployeeId = D.EmployeeId
-
+    INSERT INTO Staff_log
+    SELECT 'deleted', sysdatetime(), SYSTEM_USER, * FROM deleted
+    INSERT INTO Staff_log
+    SELECT 'updated', sysdatetime(), SYSTEM_USER, * FROM inserted
+GO
 
 --9
 DELETE Staff
-WHERE FirstName = 'Andrew' AND LastName = 'Adams'
+WHERE EmployeeId = 1
 
 
 --10
 UPDATE Staff
 SET Title = 'New Sales Manager'
-WHERE FirstName = 'Jane' AND LastName = 'Peacock'
+WHERE EmployeeId = 3
 
 --11
 SELECT *
