@@ -1,1 +1,1 @@
-Material for Intermediate SQL 
+Intermediate SQL query exercises 
