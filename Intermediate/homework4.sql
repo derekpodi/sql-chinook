@@ -22,6 +22,8 @@ SELECT
     COUNT(*)
 FROM zip_code_ragged_right
 WHERE LEFT(column5,2) = 'CA' AND column9 > 50000
+        --169   
+
 
 
 --2
@@ -40,6 +42,7 @@ SELECT TOP 1
     column1 AS Zipcode
 FROM zip_code_ragged_right
 ORDER BY column9 DESC
+        --60629
 
 
 --3
@@ -51,6 +54,7 @@ WHERE COUNTY_CODE = 37 AND FACILITY_STATUS_DESC = 'Open' AND LICENSE_CATEGORY_DE
 SELECT COUNT(*)
 FROM [Licensed Healthcare Facilities in California (OSHPD)]
 WHERE COUNTY_CODE = 37 AND FACILITY_STATUS_DESC = 'Open' AND LICENSE_CATEGORY_DESC = 'General Acute Care Hospital'
+        --26
 
 
 --4
@@ -64,6 +68,7 @@ SELECT COUNT(*)
 FROM [Licensed Healthcare Facilities in California (OSHPD)]
 WHERE ER_SERVICE_LEVEL_DESC = 'Emergency - Comprehensive'
     OR CAST(REPLACE(TOTAL_NUMBER_BEDS,',', '') AS int) > 500
+        --30
 
 
 --5
@@ -75,3 +80,4 @@ WHERE LEFT(column1, 1) = 'S' AND column3 > 7500
 SELECT COUNT(*)
 FROM yob1968
 WHERE LEFT(column1, 1) = 'S' AND column3 > 7500
+        --8
