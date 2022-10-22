@@ -81,3 +81,17 @@ SELECT COUNT(*)
 FROM yob1968
 WHERE LEFT(column1, 1) = 'S' AND column3 > 7500
         --8
+
+
+
+
+
+--------------- SELECT ALL ----------
+SELECT *
+FROM zip_code_ragged_right
+
+SELECT *
+FROM [Licensed Healthcare Facilities in California (OSHPD)]
+
+SELECT *
+FROM yob1968
