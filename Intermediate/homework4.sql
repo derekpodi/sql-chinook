@@ -27,7 +27,7 @@ WHERE LEFT(column5,2) = 'CA' AND column9 > 50000
 
 
 --2
-SELECT TOP 1
+SELECT TOP 10
     column1 AS Zipcode
     ,column4 AS City
     ,LEFT(column5,2) AS State
@@ -50,6 +50,9 @@ SELECT *
 FROM [Licensed Healthcare Facilities in California (OSHPD)]
 WHERE COUNTY_CODE = 37 AND FACILITY_STATUS_DESC = 'Open' AND LICENSE_CATEGORY_DESC = 'General Acute Care Hospital'
 
+SELECT *
+FROM [Licensed Healthcare Facilities in California (OSHPD)]
+WHERE COUNTY_NAME = 'SAN DIEGO' AND FACILITY_STATUS_DESC = 'Open' AND LICENSE_CATEGORY_DESC = 'General Acute Care Hospital'
 
 SELECT COUNT(*)
 FROM [Licensed Healthcare Facilities in California (OSHPD)]
@@ -75,6 +78,7 @@ WHERE ER_SERVICE_LEVEL_DESC = 'Emergency - Comprehensive'
 SELECT *
 FROM yob1968
 WHERE LEFT(column1, 1) = 'S' AND column3 > 7500
+ORDER BY column3 DESC
 
 
 SELECT COUNT(*)
