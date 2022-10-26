@@ -1,6 +1,6 @@
 --Derek Podimatis
 
-USE Chinook;
+USE Chinook
 
 --1
 SELECT CEILING(RAND()*100) + 100 AS RandomNumber
@@ -19,26 +19,20 @@ ORDER BY RandomByRow DESC
 SELECT
     *
     ,ROW_NUMBER() OVER (ORDER BY NEWID()) AS RandomUniqueID
-FROM Artist
+FROM Artist;
 
 
---4  ****INCORRECT****
-SELECT
+--4
+WITH CTE AS
+(
+ SELECT
     A.Name AS ArtistName
     ,AL.Title AS AlbumTitle
-    ,SUM(I.Total) AS TotalSales
+    ,SUM(IL.UnitPrice * IL.Quantity) AS TotalSales
     ,CASE
         WHEN MT.MediaTypeId = 3 THEN 'Video'
         ELSE 'Audio'
         END AS Media
-    ,RANK() OVER (PARTITION BY CASE
-        WHEN MT.MediaTypeId = 3 THEN 'Video'
-        ELSE 'Audio'
-        END ORDER BY SUM(I.Total))
-    ,DENSE_RANK() OVER (PARTITION BY CASE
-        WHEN MT.MediaTypeId = 3 THEN 'Video'
-        ELSE 'Audio'
-        END ORDER BY SUM(I.Total))
 FROM Artist A 
 JOIN Album AL 
     ON AL.ArtistId = A.ArtistId
@@ -48,7 +42,44 @@ JOIN MediaType MT
     ON MT.MediaTypeId = T.MediaTypeId
 JOIN InvoiceLine IL 
     ON IL.TrackId = T.TrackId
-JOIN Invoice I 
-    ON I.InvoiceId = IL.InvoiceId
 GROUP BY A.Name, AL.Title, MT.MediaTypeId
-HAVING SUM(I.Total) > 15
+HAVING SUM(IL.UnitPrice * IL.Quantity) > 15
+)
+SELECT
+    ArtistName
+    ,AlbumTitle
+    ,TotalSales 
+    ,Media 
+    ,RANK() OVER (PARTITION BY Media ORDER BY TotalSales DESC) AS Ranking
+    ,DENSE_RANK() OVER (PARTITION BY Media ORDER BY TotalSales DESC) AS DenseRanking
+FROM CTE;
+
+
+--5
+WITH CTE AS
+(
+SELECT
+    G.Name AS GenreName
+    ,AL.Title AS AlbumTitle
+    ,SUM(IL.UnitPrice * IL.Quantity) AS TotalSales
+    ,RANK() OVER (PARTITION BY G.Name ORDER BY SUM(IL.UnitPrice * IL.Quantity) DESC) AS Ranking
+FROM Album AL
+JOIN Track T 
+    ON T.AlbumId = AL.AlbumId
+JOIN Genre G 
+    ON G.GenreId = T.GenreId
+JOIN InvoiceLine IL
+    ON IL.TrackId = T.TrackId
+GROUP BY AL.Title, G.Name
+HAVING SUM(IL.UnitPrice * IL.Quantity) > 15
+)
+SELECT
+    GenreName
+    ,AlbumTitle
+    ,TotalSales
+    ,Ranking
+FROM CTE
+WHERE Ranking <=3;
+
+
+--6
