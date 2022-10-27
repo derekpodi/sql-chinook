@@ -173,7 +173,29 @@ SELECT
     ,TrackName
     ,COUNT(TrackId) OVER (PARTITION BY AlbumTitle) AS TrackCount
     ,CONVERT(varchar, DATEADD(ms, Milliseconds, 0), 108) AS TrackTime
-FROM CTE
+FROM CTE;
 
 
 --10
+WITH CTE AS
+(
+SELECT
+    I.BillingCountry
+    ,YEAR(I.InvoiceDate) AS BillingYear
+    ,SUM(I.Total) AS Total
+FROM Invoice I
+WHERE I.BillingCountry IN (
+    SELECT I.BillingCountry
+    FROM Invoice I
+    WHERE I.BillingCountry IN ('USA', 'Canada')
+)
+GROUP BY I.BillingCountry, YEAR(I.InvoiceDate)
+)
+SELECT
+    BillingCountry
+    ,BillingYear
+    ,LAG(Total,0,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) AS CurrentYear
+    ,LAG(Total,1,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) AS PriorYear
+    ,LAG(Total,0,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) - LAG(Total,1,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) AS YearDifference
+FROM CTE
+
