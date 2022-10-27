@@ -83,3 +83,97 @@ WHERE Ranking <=3;
 
 
 --6
+WITH CTE AS
+(
+SELECT 
+    A.Name AS ArtistName
+    ,SUM(IL.UnitPrice * IL.Quantity) TotalPrice
+FROM Artist A 
+JOIN Album AL
+    ON AL.ArtistId = A.ArtistId
+JOIN Track T 
+    ON T.AlbumId = AL.AlbumId 
+JOIN InvoiceLine IL 
+    ON IL.TrackId = T.TrackId
+GROUP BY A.Name
+)
+SELECT 
+    ArtistName
+    ,TotalPrice
+    ,SUM(TotalPrice) OVER (ORDER BY ArtistName) AS RunningTotal
+FROM CTE;
+
+
+--7
+WITH CTE AS 
+(
+SELECT
+    I.BillingCountry
+    ,SUM(IL.UnitPrice * IL.Quantity) TotalSales
+FROM InvoiceLine IL 
+JOIN Invoice I 
+    ON I.InvoiceId = IL.InvoiceId
+GROUP BY I.BillingCountry
+)
+SELECT
+    BillingCountry
+    ,TotalSales
+    ,NTILE(5) OVER (ORDER BY TotalSales DESC, BillingCountry) AS Quintile
+FROM CTE;
+
+
+--8
+WITH CTE AS
+(
+SELECT
+    C.FirstName
+    ,C.LastName
+    ,C.Country
+    ,C.CustomerId
+    ,CAST(I.InvoiceDate AS Date) AS InvoiceDate
+    ,SUM(IL.UnitPrice * IL.Quantity) AS Total
+FROM Customer C
+Join Invoice I 
+    ON I.CustomerId = C.CustomerId
+Join InvoiceLine IL 
+    ON IL.InvoiceId = I.InvoiceId
+GROUP BY C.FirstName, C.LastName, C.Country, C.CustomerId, I.InvoiceDate
+)
+SELECT
+    FirstName
+    ,LastName
+    ,Country
+    ,InvoiceDate
+    ,Total
+    ,SUM(Total) OVER (PARTITION BY CustomerId) AS TotalByCustomer
+    ,SUM(Total) OVER (PARTITION BY Country) AS TotalByCountry
+FROM CTE
+ORDER BY Country, LastName, Total;
+
+
+--9
+WITH CTE AS 
+(
+SELECT
+    AL.Title AS AlbumTitle
+    ,T.Name AS TrackName
+    ,T.Milliseconds
+    ,T.TrackId
+FROM Album AL 
+JOIN Track T 
+    ON T.AlbumId = AL.AlbumId
+JOIN Artist A 
+    ON A.ArtistId = AL.ArtistId
+WHERE A.Name = 'Green Day'
+)
+SELECT
+    AlbumTitle
+    ,CONVERT(varchar, DATEADD(ms, SUM(Milliseconds) OVER (PARTITION BY AlbumTitle), 0), 108) AS AlbumTime
+    ,ROW_NUMBER() OVER (PARTITION BY AlbumTitle ORDER BY Milliseconds DESC) AS TrackNumber
+    ,TrackName
+    ,COUNT(TrackId) OVER (PARTITION BY AlbumTitle) AS TrackCount
+    ,CONVERT(varchar, DATEADD(ms, Milliseconds, 0), 108) AS TrackTime
+FROM CTE
+
+
+--10
