@@ -2,6 +2,7 @@
 
 USE Chinook
 
+
 --1
 SELECT CEILING(RAND()*100) + 100 AS RandomNumber
 
@@ -197,5 +198,5 @@ SELECT
     ,LAG(Total,0,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) AS CurrentYear
     ,LAG(Total,1,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) AS PriorYear
     ,LAG(Total,0,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) - LAG(Total,1,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) AS YearDifference
-FROM CTE
+FROM CTE;
 
