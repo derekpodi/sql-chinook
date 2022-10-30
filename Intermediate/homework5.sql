@@ -4,21 +4,22 @@ USE Chinook
 
 
 --1
-SELECT CEILING(RAND()*100) + 100 AS RandomNumber
+SELECT CEILING(RAND() * 101) + 99 AS RandomNumber
 
 
 --2
 SELECT
-    T.TrackId
-    ,T.Name
-    ,CEILING(RAND(CAST(NEWID() AS varbinary))*3000) AS RandomByRow
-FROM Track T
+    TrackId
+    ,Name
+    ,CEILING(RAND(CAST(NEWID() AS varbinary)) * 3000) AS RandomByRow
+FROM Track 
 ORDER BY RandomByRow DESC
 
 
 --3
 SELECT
-    *
+    ArtistId
+    ,Name
     ,ROW_NUMBER() OVER (ORDER BY NEWID()) AS RandomUniqueID
 FROM Artist;
 
@@ -26,7 +27,7 @@ FROM Artist;
 --4
 WITH CTE AS
 (
- SELECT
+SELECT
     A.Name AS ArtistName
     ,AL.Title AS AlbumTitle
     ,SUM(IL.UnitPrice * IL.Quantity) AS TotalSales
@@ -43,8 +44,7 @@ JOIN MediaType MT
     ON MT.MediaTypeId = T.MediaTypeId
 JOIN InvoiceLine IL 
     ON IL.TrackId = T.TrackId
-GROUP BY A.Name, AL.Title, MT.MediaTypeId
-HAVING SUM(IL.UnitPrice * IL.Quantity) > 15
+GROUP BY A.Name, AL.Title, CASE WHEN MT.MediaTypeId = 3 THEN 'Video' ELSE 'Audio' END
 )
 SELECT
     ArtistName
@@ -53,7 +53,8 @@ SELECT
     ,Media 
     ,RANK() OVER (PARTITION BY Media ORDER BY TotalSales DESC) AS Ranking
     ,DENSE_RANK() OVER (PARTITION BY Media ORDER BY TotalSales DESC) AS DenseRanking
-FROM CTE;
+FROM CTE
+WHERE TotalSales > 15;
 
 
 --5
@@ -80,7 +81,8 @@ SELECT
     ,TotalSales
     ,Ranking
 FROM CTE
-WHERE Ranking <=3;
+WHERE Ranking <= 3
+ORDER BY GenreName, Ranking;
 
 
 --6
@@ -157,6 +159,7 @@ WITH CTE AS
 (
 SELECT
     AL.Title AS AlbumTitle
+    ,AL.AlbumId
     ,T.Name AS TrackName
     ,T.Milliseconds
     ,T.TrackId
@@ -169,34 +172,32 @@ WHERE A.Name = 'Green Day'
 )
 SELECT
     AlbumTitle
-    ,CONVERT(varchar, DATEADD(ms, SUM(Milliseconds) OVER (PARTITION BY AlbumTitle), 0), 108) AS AlbumTime
-    ,ROW_NUMBER() OVER (PARTITION BY AlbumTitle ORDER BY Milliseconds DESC) AS TrackNumber
+    ,CONVERT(varchar, DATEADD(ms, SUM(Milliseconds) OVER (PARTITION BY AlbumId), 0), 108) AS AlbumTime
+    ,ROW_NUMBER() OVER (PARTITION BY AlbumId ORDER BY Milliseconds DESC) AS TrackNumber
     ,TrackName
-    ,COUNT(TrackId) OVER (PARTITION BY AlbumTitle) AS TrackCount
+    ,COUNT(TrackId) OVER (PARTITION BY AlbumId) AS TrackCount
     ,CONVERT(varchar, DATEADD(ms, Milliseconds, 0), 108) AS TrackTime
-FROM CTE;
+FROM CTE
+ORDER BY AlbumTitle, TrackNumber;
 
 
 --10
 WITH CTE AS
 (
 SELECT
-    I.BillingCountry
-    ,YEAR(I.InvoiceDate) AS BillingYear
-    ,SUM(I.Total) AS Total
-FROM Invoice I
-WHERE I.BillingCountry IN (
-    SELECT I.BillingCountry
-    FROM Invoice I
-    WHERE I.BillingCountry IN ('USA', 'Canada')
-)
-GROUP BY I.BillingCountry, YEAR(I.InvoiceDate)
+    BillingCountry
+    ,YEAR(InvoiceDate) AS BillingYear
+    ,SUM(Total) AS CurrentYear
+FROM Invoice 
+WHERE BillingCountry IN ('USA', 'Canada')
+GROUP BY BillingCountry, YEAR(InvoiceDate)
 )
 SELECT
     BillingCountry
     ,BillingYear
-    ,LAG(Total,0,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) AS CurrentYear
-    ,LAG(Total,1,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) AS PriorYear
-    ,LAG(Total,0,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) - LAG(Total,1,0) OVER (PARTITION BY BillingCountry ORDER BY BillingCountry, BillingYear) AS YearDifference
-FROM CTE;
+    ,CurrentYear
+    ,LAG(CurrentYear,1,0) OVER (PARTITION BY BillingCountry ORDER BY BillingYear) AS PriorYear
+    ,CurrentYear - LAG(CurrentYear,1,0) OVER (PARTITION BY BillingCountry ORDER BY YEAR(BillingYear)) AS YearDifference
+FROM CTE
+ORDER BY BillingCountry;
 
