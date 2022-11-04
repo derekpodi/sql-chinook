@@ -28,9 +28,26 @@ TO [Read and Update];
 
 
 --Create New Schema in Chinook
+CREATE SCHEMA dev;
+
+SELECT * 
+INTO dev.Employee 
+FROM Employee
+
+SELECT * 
+INTO dev.Customer
+FROM Customer
 
 
 --Add User Accounts to Chinook and Assign Permissions
+ALTER ROLE db_owner ADD MEMBER TestLogin1;
+
+ALTER ROLE db_datareader ADD MEMBER TestLogin2;
+ALTER ROLE db_datawriter ADD MEMBER TestLogin2;
+--PERMISSIONS:DENY SELECT on BirthDate Column in Employee table.
+--Permissions: Assign as the schema owner to the “dev” schema
+--Permissions: “Read and Update” Role
+--Permissions: “Read and Update” Role, DENY SELECT, INSERT, UPDATE and DELETE permissions to Employee table
 
 
 --Login With Diffrent TestLogin Accounts
