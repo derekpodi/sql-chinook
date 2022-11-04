@@ -1,21 +1,22 @@
 
 -- USE DCL Language to Create the Logins and Permissions if not possible with SQL Edge
+
 USE Chinook
-/*
+
 --Create User Accounts
-CREATE LOGIN TestLogin1 WITH PASSWORD = 'test';
+CREATE LOGIN TestLogin1 WITH PASSWORD = 'MyPassword@';
 CREATE USER TestLogin1 FOR LOGIN TestLogin1;
 
-CREATE LOGIN TestLogin2 WITH PASSWORD = 'test';
+CREATE LOGIN TestLogin2 WITH PASSWORD = 'MyPassword@';
 CREATE USER TestLogin2 FOR LOGIN TestLogin2;
 
-CREATE LOGIN TestLogin3 WITH PASSWORD = 'test';
+CREATE LOGIN TestLogin3 WITH PASSWORD = 'MyPassword@';
 CREATE USER TestLogin3 FOR LOGIN TestLogin3;
 
-CREATE LOGIN TestLogin4 WITH PASSWORD = 'test';
+CREATE LOGIN TestLogin4 WITH PASSWORD = 'MyPassword@';
 CREATE USER TestLogin4 FOR LOGIN TestLogin4;
 
-CREATE LOGIN TestLogin5 WITH PASSWORD = 'test';
+CREATE LOGIN TestLogin5 WITH PASSWORD = 'MyPassword@';
 CREATE USER TestLogin5 FOR LOGIN TestLogin5;
 
 
@@ -53,12 +54,29 @@ ALTER ROLE db_datawriter ADD MEMBER TestLogin2;
 --Login With Diffrent TestLogin Accounts
 
 
-*/
+--Drop Users/Logins
+
+DROP USER TestLogin1;
+DROP LOGIN TestLogin1;
+
+DROP USER TestLogin2;
+DROP LOGIN TestLogin2;
+
+DROP USER TestLogin3;
+DROP LOGIN TestLogin3;
+
+DROP USER TestLogin4;
+DROP LOGIN TestLogin4;
+
+DROP USER TestLogin5;
+DROP LOGIN TestLogin5;
 
 
-/*
---UNCOMMENT, EXEXCUTE SELECT STATEMENTS, AND THEN SUBMIT SCREENSHOT --
 
+
+
+
+---------- EXEC THEN SCREENSHOT RESULT FOR HW -------------
 --Role Membership--
 SELECT
     user_name(member_principal_id) AS RoleMember ,user_name(role_principal_id) AS RoleName
@@ -87,4 +105,3 @@ LEFT JOIN sys.objects O ON dp.major_id = O.object_id
 LEFT JOIN sys.sysusers U ON U.uid = DP.grantee_principal_id
 WHERE U.name LIKE 'TestLogin%' OR U.name = 'Read and Update'
 ORDER BY UserName
-*/
