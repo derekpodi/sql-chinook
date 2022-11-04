@@ -1,10 +1,30 @@
+
 -- USE DCL Language to Create the Logins and Permissions if not possible with SQL Edge
 USE Chinook
-
+/*
 --Create User Accounts
+CREATE LOGIN TestLogin1 WITH PASSWORD = 'test';
+CREATE USER TestLogin1 FOR LOGIN TestLogin1;
+
+CREATE LOGIN TestLogin2 WITH PASSWORD = 'test';
+CREATE USER TestLogin2 FOR LOGIN TestLogin2;
+
+CREATE LOGIN TestLogin3 WITH PASSWORD = 'test';
+CREATE USER TestLogin3 FOR LOGIN TestLogin3;
+
+CREATE LOGIN TestLogin4 WITH PASSWORD = 'test';
+CREATE USER TestLogin4 FOR LOGIN TestLogin4;
+
+CREATE LOGIN TestLogin5 WITH PASSWORD = 'test';
+CREATE USER TestLogin5 FOR LOGIN TestLogin5;
 
 
 --Create New DB Role in Chinook
+---https://www.sqlservertutorial.net/sql-server-administration/sql-server-create-role/--
+CREATE ROLE [Read and Update];
+GRANT SELECT, INSERT, UPDATE, DELETE 
+ON SCHEMA::[Read and Update]
+TO [Read and Update];
 
 
 --Create New Schema in Chinook
@@ -14,6 +34,9 @@ USE Chinook
 
 
 --Login With Diffrent TestLogin Accounts
+
+
+*/
 
 
 /*
