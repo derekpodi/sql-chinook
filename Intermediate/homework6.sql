@@ -19,17 +19,16 @@ CREATE USER TestLogin4 FOR LOGIN TestLogin4;
 CREATE LOGIN TestLogin5 WITH PASSWORD = 'MyPassword@';
 CREATE USER TestLogin5 FOR LOGIN TestLogin5;
 
-
+GO
 --Create New DB Role in Chinook
 ---https://www.sqlservertutorial.net/sql-server-administration/sql-server-create-role/--
 CREATE ROLE [Read and Update];
-GRANT SELECT, INSERT, UPDATE, DELETE 
-ON SCHEMA::[Read and Update]
-TO [Read and Update];
-
+GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::dbo TO [Read and Update];
+GO
 
 --Create New Schema in Chinook
-CREATE SCHEMA dev;
+CREATE SCHEMA dev AUTHORIZATION TestLogin3;
+GO
 
 SELECT * 
 INTO dev.Employee 
@@ -41,20 +40,28 @@ FROM Customer
 
 
 --Add User Accounts to Chinook and Assign Permissions
+--https://stackoverflow.com/questions/11086967/how-to-permit-a-sql-server-user-to-insert-update-delete-data-but-not-alter-sche
 ALTER ROLE db_owner ADD MEMBER TestLogin1;
 
 ALTER ROLE db_datareader ADD MEMBER TestLogin2;
 ALTER ROLE db_datawriter ADD MEMBER TestLogin2;
---PERMISSIONS:DENY SELECT on BirthDate Column in Employee table.
+--GRANT ALTER ON SCHEMA::dbo TO TestLogin2;
+DENY SELECT ON OBJECT::Employee.BirthDate TO TestLogin2;           --<< ERROR HERE - NEED PERMISION TO COLUMN
+
 --Permissions: Assign as the schema owner to the “dev” schema
---Permissions: “Read and Update” Role
---Permissions: “Read and Update” Role, DENY SELECT, INSERT, UPDATE and DELETE permissions to Employee table
+GRANT ALTER ON SCHEMA::dev TO TestLogin3;
+
+ALTER ROLE [Read and Update] ADD MEMBER TestLogin4;
+
+ALTER ROLE [Read and Update] ADD MEMBER TestLogin5;
+--GRANT ALTER ON SCHEMA::dbo TO TestLogin5;
+DENY SELECT, INSERT, UPDATE, DELETE ON dbo.Employee TO TestLogin5;
 
 
 --Login With Diffrent TestLogin Accounts
 
 
---Drop Users/Logins
+--Drop Users/Logins/Role/Schema
 
 DROP USER TestLogin1;
 DROP LOGIN TestLogin1;
@@ -71,8 +78,11 @@ DROP LOGIN TestLogin4;
 DROP USER TestLogin5;
 DROP LOGIN TestLogin5;
 
+DROP TABLE dev.Customer
+DROP TABLE dev.Employee
 
-
+DROP ROLE [Read and Update]
+DROP SCHEMA dev
 
 
 
