@@ -46,10 +46,11 @@ ALTER ROLE db_owner ADD MEMBER TestLogin1;
 ALTER ROLE db_datareader ADD MEMBER TestLogin2;
 ALTER ROLE db_datawriter ADD MEMBER TestLogin2;
 --GRANT ALTER ON SCHEMA::dbo TO TestLogin2;
-DENY SELECT ON OBJECT::Employee.BirthDate TO TestLogin2;           --<< ERROR HERE - NEED PERMISION TO COLUMN
+--https://www.mssqltips.com/sqlservertip/2124/filtering-sql-server-columns-using-column-level-permissions/
+DENY SELECT ON dbo.Employee (BirthDate) TO TestLogin2;           
 
 --Permissions: Assign as the schema owner to the “dev” schema
-GRANT ALTER ON SCHEMA::dev TO TestLogin3;
+--GRANT ALTER ON SCHEMA::dev TO TestLogin3;
 
 ALTER ROLE [Read and Update] ADD MEMBER TestLogin4;
 
