@@ -60,6 +60,33 @@ DENY SELECT, INSERT, UPDATE, DELETE ON dbo.Employee TO TestLogin5;
 
 
 --Login With Diffrent TestLogin Accounts
+--https://learn.microsoft.com/en-us/sql/t-sql/statements/execute-as-transact-sql?redirectedfrom=MSDN&view=sql-server-ver16
+EXECUTE AS LOGIN = 'TestLogin1'; 
+SELECT *
+INTO #Customer_Temp 
+FROM Customer
+REVERT;  
+
+EXECUTE AS LOGIN = 'TestLogin2'; 
+SELECT BirthDate
+FROM Employee
+REVERT;
+
+EXECUTE AS LOGIN = 'TestLogin3'; 
+SELECT * FROM dev.Employee
+SELECT * FROM dev.Customer
+REVERT;
+
+EXECUTE AS LOGIN = 'TestLogin4'; 
+UPDATE #Customer_Temp
+SET FirstName = 'Brian'
+WHERE #Customer_Temp.SupportRepId = 1
+CREATE TABLE Example (number int);
+REVERT;
+
+EXECUTE AS LOGIN = 'TestLogin5'; 
+SELECT * FROM Employee
+REVERT;
 
 
 --Drop Users/Logins/Role/Schema
