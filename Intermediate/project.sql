@@ -8,7 +8,12 @@ GO
 */
 
 /*
-CREATE TABLE 
+CREATE TABLE Section(
+    SectionID int
+    ,CourseID int
+    ,TermID int
+    ,RoomID int
+)
 
 
 */
