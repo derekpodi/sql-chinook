@@ -1,14 +1,16 @@
 USE master 
 GO
 
-/*
--------- CREATE DATABASE --------
 
-CREATE DATABASE LSP_dp 
+-------- CREATE DATABASES --------
+CREATE DATABASE LSP_stage
+GO
+
+CREATE DATABASE LSP_dp
+GO
+
 USE LSP_dp 
 GO
-*/
-
 
 
 /*
@@ -130,11 +132,11 @@ EXEC InsertPerson_p 'Eric','Williamson','work','500 Elm St.','North Pole'
 SELECT TOP 1 * FROM Person ORDER BY PersonID DESC
 SELECT TOP 1 * FROM Address ORDER BY AddressID DESC
 
-/*
+*/
 
 
 
-/*
+
 -------- DROP OBJECTS --------
 DROP TABLE Section
 
@@ -154,6 +156,14 @@ DROP TABLE FacultyPayment
 
 DROP TABLE Faculty
 
-DROP DATABASE LSP_dp
+DROP DATABASE LSP_dp;
 
-*/
+
+
+
+--Script DB - ERD
+--https://stackoverflow.com/questions/59852790/script-database-with-azure-data-studio
+--https://www.sqlshack.com/generate-data-scripts-using-ssms-and-azure-data-studio/
+--https://stackoverflow.com/questions/53293349/azure-data-studio-schema-diagram
+--https://www.sqlshack.com/sql-server-data-import-using-azure-data-studio/
+
