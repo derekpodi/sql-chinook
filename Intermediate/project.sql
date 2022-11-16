@@ -454,7 +454,7 @@ UNION
 SELECT *
 FROM [Faculty19]
 
-
+--Dupe Section ID 
 WITH CTE AS(
     SELECT *
     FROM [Sections SU11-SU15]
@@ -468,5 +468,8 @@ SELECT
 FROM CTE
 GROUP BY SectionID
 ORDER BY COUNT(SectionID) DESC
+
+--DELETE DUPE
+DELETE FROM [Sections SU11-SU15] WHERE SectionID = 10050 AND PrimaryInstructor IS NULL
 
 */
