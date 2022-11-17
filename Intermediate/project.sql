@@ -292,42 +292,70 @@ FROM [LSP_dp]..[Faculty] F
 LEFT JOIN Section S ON SUBSTRING(S.PrimaryInstructor, 4, LEN(S.PrimaryInstructor)) = F.FacultyLastName
 
 
+GO
 
 
-/*
 --------ADDITIONAL DATABASE OBJECTS--------
 --1.
 CREATE VIEW CourseRevenue_v AS
 SELECT
-    [Course Code]
-    ,[Course Title]
-    ,[Count of Sections]
-    ,[Total Gross Revenue]
-    ,[AVG Revenue Per Section]
-FROM [TABLE NAME]
+    C.[CourseCode]
+    ,C.[CourseTitle]
+    ,COUNT(S.SectionID) AS SectionCount
+    ,COUNT(S.SectionID) * C.FullCourseFee AS [Total Gross Revenue]
+    ,(COUNT(S.SectionID) * C.FullCourseFee) / COUNT(S.SectionID) AS [AVG Revenue Per Section]
+FROM Course C
+JOIN Section S ON S.CourseID = C.CourseID
+WHERE S.SectionStatus != 'CN'
+GROUP BY C.[CourseCode], C.[CourseTitle], C.[FullCourseFee]
 
+
+GO
 --2.
 CREATE VIEW AnnualRevenue_v AS
+WITH CTE AS(
+    SELECT
+    F.FacultyID 
+    ,T.AcademicYear
+    ,CONCAT(F.FacultyFirstName, ' ', F.FacultyLastName) AS FacultyName
+    ,COUNT(S.SectionID) * C.FullCourseFee AS [Total Gross Revenue]
+FROM Course C
+JOIN Section S ON S.CourseID = C.CourseID
+JOIN FacultyPayment FP ON FP.SectionID = S.SectionID
+JOIN Faculty F ON F.FacultyID = FP.FacultyID
+JOIN Term T ON S.TermID = T.TermID
+WHERE S.SectionStatus != 'CN'
+GROUP BY F.[FacultyID], T.[AcademicYear], C.[FullCourseFee], CONCAT(F.FacultyFirstName, ' ', F.FacultyLastName)
+)
 SELECT
-    [Gross Revenue from tuition]
-    ,[faculty payments fr each academic year]
-FROM [TABLE NAME]
+    CTE.FacultyID
+    ,CTE.FacultyName
+    ,CTE.AcademicYear
+    ,SUM(CTE.[Total Gross Revenue]) AS [Gross Revenue from Tuition]
+FROM CTE
+GROUP BY CTE.FacultyID, CTE.FacultyName, CTE.AcademicYear
+
+GO
 
 --3.
 CREATE PROC StudentHistory_p @PersonPrimaryKey int AS
 SELECT
-    [Student Name]
-    ,[SectionID]
-    ,[Course Code]
-    ,[CourseTitle]
-    ,[Primary Instructor Name]
-    ,[Term Code]
-    ,[Start Date]
-    ,[Tuition Paid]
-    ,[Grade]
-FROM [TABLE NAME]
-WHERE PersonID = @PersonPrimaryKey
+    CONCAT(P.FirstName, ' ', P.LastName) AS [Student Name]
+    ,S.[SectionID] AS [Section ID]
+    ,S.[CourseCode] AS [Course Code]
+    ,S.[CourseTitle] AS [Course Title]
+    ,S.[PrimaryInstructor] AS [Primary Instructor Name]
+    ,S.[TermCode] AS [Term Code]
+    ,S.[StartDate] AS [Start Date]
+    ,CL.[TuitionAmount] AS [Tuition Paid]
+    ,CL.[Grade] AS [Grade]
+FROM Person P
+JOIN ClassList CL ON CL.PersonID = P.PersonID
+JOIN Section S ON S.SectionID = CL.SectionID
+WHERE P.PersonID = @PersonPrimaryKey
 
+
+/*
 --4.
 CREATE PROC InsertPerson_p
     @PersonFirstName varchar(50)
