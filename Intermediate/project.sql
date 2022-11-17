@@ -48,7 +48,7 @@ CREATE TABLE Section(
     ,TermID int FOREIGN KEY REFERENCES Term(TermID)
     ,RoomID int FOREIGN KEY REFERENCES Room(RoomID)
     ,CourseCode varchar(50)
-    ,CourseTitle varchar(50)
+    ,CourseTitle varchar(100)
     ,TermCode varchar(50)
     ,StartDate DATE
     ,EndDate DATE
@@ -171,7 +171,11 @@ FROM [LSP_stage]..[Terms19]
 INSERT INTO [LSP_dp]..Section
 (
   [SectionID]
+  ,[CourseID]
+  ,[TermID]
+  ,[RoomID]
   ,[CourseCode]
+  ,[CourseTitle]
   ,[TermCode]
   ,[StartDate]
   ,[EndDate]
@@ -183,11 +187,16 @@ INSERT INTO [LSP_dp]..Section
   ,[SecondaryInstructor]
   ,[SecondaryPayment]
 )
-SELECT [SectionID], [CourseCode], [TermCode], [StartDate], [EndDate], [Days], [SectionStatus], [RoomName], [PrimaryInstructor], [PrimaryPayment], [SecondaryInstructor], [SecondaryPayment]
-FROM [LSP_stage]..[Sections SU11-SU15]
+SELECT [SectionID],[CourseID], [TermID], [RoomID], S.[CourseCode], S.[CourseTitle], [TermCode], [StartDate], [EndDate], [Days], [SectionStatus], S.[RoomName], [PrimaryInstructor], [PrimaryPayment], [SecondaryInstructor], [SecondaryPayment]
+FROM [LSP_stage]..[Sections SU11-SU15] S
+LEFT JOIN [LSP_dp]..[Room] R ON R.RoomName = S.RoomName
+LEFT JOIN [LSP_dp]..[Course] C ON C.CourseCode = S.CourseCode
 UNION
-SELECT [SectionID], [CourseCode], [TermCode], [StartDate], [EndDate], [Days], [SectionStatus], [RoomName], [PrimaryInstructor], [PrimaryPayment], [SecondaryInstructor], [SecondaryPayment]
-FROM [LSP_stage]..[Sections FA15-SU19]
+SELECT [SectionID],[CourseID], [TermID], [RoomID], SF.[CourseCode], SF.[CourseTitle], [TermCode], [StartDate], [EndDate], [Days], [SectionStatus], SF.[RoomName], [PrimaryInstructor], [PrimaryPayment], [SecondaryInstructor], [SecondaryPayment]
+FROM [LSP_stage]..[Sections FA15-SU19] SF
+LEFT JOIN [LSP_dp]..[Room] R ON R.RoomName = SF.RoomName
+LEFT JOIN [LSP_dp]..[Course] C ON C.CourseCode = SF.CourseCode
+
 
 
 --Person
@@ -215,16 +224,17 @@ FROM [LSP_stage]..[Persons19]
 --Address
 INSERT INTO [LSP_dp]..Address
 (
-  [AddressType]
+  [PersonID]
+  ,[AddressType]
   ,[AddressLine]
   ,[City]
   ,[State]
   ,[PostalCode]
 )
-SELECT 'home' AS [AddressType], [AddressLine], [City], [State], [PostalCode]
+SELECT [PersonID], 'home' AS [AddressType], [AddressLine], [City], [State], [PostalCode]
 FROM [LSP_stage]..[Persons15]
 UNION
-SELECT 'home' AS [AddressType], [AddressLine], [City], [State], [PostalCode]
+SELECT [PersonID], 'home' AS [AddressType], [AddressLine], [City], [State], [PostalCode]
 FROM [LSP_stage]..[Persons19]
 
 
@@ -242,11 +252,13 @@ INSERT INTO [LSP_dp]..ClassList
   ,[Grade]
   ,[TermID]
 )
-SELECT [SectionID], [PersonID], [LastName], [FirstName], [Phone], [Email], [EnrollmentStatus], [TuitionAmount], [Grade], [TermID]
-FROM [LSP_stage]..[Classlist SU11-SU15]
+SELECT S.[SectionID], [PersonID], [LastName], [FirstName], [Phone], [Email], [EnrollmentStatus], [TuitionAmount], [Grade], CL.[TermID]
+FROM [LSP_stage]..[Classlist SU11-SU15] CL
+LEFT JOIN [LSP_dp]..[Section] S ON S.SectionID = CL.SectionID
 UNION
-SELECT [SectionID], [PersonID], [LastName], [FirstName], [Phone], [Email], [EnrollmentStatus], [TuitionAmount], [Grade], [TermID]
-FROM [LSP_stage]..[ClassList FA15-SU19]
+SELECT S.[SectionID], [PersonID], [LastName], [FirstName], [Phone], [Email], [EnrollmentStatus], [TuitionAmount], [Grade], CLF.[TermID]
+FROM [LSP_stage]..[ClassList FA15-SU19] CLF
+LEFT JOIN [LSP_dp]..[Section] S ON S.SectionID = CLF.SectionID
 
 
 --Faculty
@@ -273,12 +285,11 @@ FROM [LSP_stage]..[Faculty19]
 INSERT INTO [LSP_dp]..FacultyPayment
 (
   [FacultyID]
+  ,[SectionID]
 )
-SELECT [FacultyID]
-FROM [LSP_dp]..[Faculty]
-UNION
-SELECT [FacultyID]
-FROM [LSP_dp]..[Faculty]
+SELECT [FacultyID], [SectionID]
+FROM [LSP_dp]..[Faculty] F 
+LEFT JOIN Section S ON SUBSTRING(S.PrimaryInstructor, 4, LEN(S.PrimaryInstructor)) = F.FacultyLastName
 
 
 
@@ -385,6 +396,7 @@ DROP DATABASE LSP_dp;
 --https://www.sqlshack.com/generate-data-scripts-using-ssms-and-azure-data-studio/
 --https://stackoverflow.com/questions/53293349/azure-data-studio-schema-diagram
 --https://www.sqlshack.com/sql-server-data-import-using-azure-data-studio/
+--https://learnsql.com/cookbook/how-to-create-a-table-with-a-foreign-key-in-sql/
 
 
 /*
@@ -429,7 +441,7 @@ FROM [Courses19]
 --Sections
 SELECT *
 FROM [Sections SU11-SU15]
-UNION
+UNION 
 SELECT *
 FROM [Sections FA15-SU19]
 
