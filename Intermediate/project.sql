@@ -355,7 +355,7 @@ JOIN Section S ON S.SectionID = CL.SectionID
 WHERE P.PersonID = @PersonPrimaryKey
 
 
-/*
+GO
 --4.
 CREATE PROC InsertPerson_p
     @PersonFirstName varchar(50)
@@ -364,19 +364,18 @@ CREATE PROC InsertPerson_p
     ,@AddressAddressLine varchar(50)
     ,@AddressCity varchar(50) AS
 BEGIN
-    INSERT INTO Person(FirstName, LastName)
-    VALUES(@PersonFirstName, @PersonLastName);
+    INSERT INTO Person(PersonID, FirstName, LastName)
+    SELECT MAX(PersonID) + 1, @PersonFirstName, @PersonLastName FROM Person;
 
-    INSERT INTO Address(AddressType, AddressLine, City)
-    VALUES(@AddressAddressType, @AddressAddressLine, @AddressCity);
-
+    INSERT INTO Address(PersonID, AddressType, AddressLine, City)
+    SELECT MAX(PersonID), @AddressAddressType, @AddressAddressLine, @AddressCity FROM Person;
 END
 
-*/
 
 
 
-/*
+
+GO
 ---------EXECUTE CODE FOR SCREENSHOTS--------
 --1
 SELECT * FROM CourseRevenue_v ORDER BY CourseCode
@@ -386,11 +385,10 @@ SELECT * FROM AnnualRevenue_v ORDER BY AcademicYear
 EXEC StudentHistory_p 1400
 --4
 EXEC InsertPerson_p 'Eric','Williamson','work','500 Elm St.','North Pole'
-
 SELECT TOP 1 * FROM Person ORDER BY PersonID DESC
 SELECT TOP 1 * FROM Address ORDER BY AddressID DESC
 
-*/
+
 
 
 
