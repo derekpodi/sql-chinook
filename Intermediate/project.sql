@@ -299,7 +299,9 @@ GO
 --1.
 CREATE VIEW CourseRevenue_v AS
 SELECT
-    C.[CourseCode]
+    COUNT(S.[CourseID]) AS [Course Count]
+    ,C.[CourseID]
+    ,C.[CourseCode]
     ,C.[CourseTitle]
     ,COUNT(S.SectionID) AS SectionCount
     ,COUNT(S.SectionID) * C.FullCourseFee AS [Total Gross Revenue]
@@ -307,7 +309,7 @@ SELECT
 FROM Course C
 JOIN Section S ON S.CourseID = C.CourseID
 WHERE S.SectionStatus != 'CN'
-GROUP BY C.[CourseCode], C.[CourseTitle], C.[FullCourseFee]
+GROUP BY C.[CourseCode], C.[CourseTitle], C.[FullCourseFee], C.[CourseID]
 
 
 GO
@@ -334,7 +336,6 @@ SELECT
     ,SUM(CTE.[Total Gross Revenue]) AS [Gross Revenue from Tuition]
 FROM CTE
 GROUP BY CTE.FacultyID, CTE.FacultyName, CTE.AcademicYear
-
 GO
 
 --3.
@@ -380,7 +381,7 @@ GO
 --1
 SELECT * FROM CourseRevenue_v ORDER BY CourseCode
 --2
-SELECT * FROM AnnualRevenue_v ORDER BY AcademicYear
+SELECT * FROM AnnualRevenue_v ORDER BY AcademicYear 
 --3
 EXEC StudentHistory_p 1400
 --4
