@@ -245,7 +245,6 @@ LEFT JOIN Section S ON S.CourseID = C.CourseID AND S.SectionStatus != 'CN'
 LEFT JOIN ClassList CL ON CL.SectionID = S.SectionID
 GROUP BY C.CourseCode, C.CourseTitle
 
-
 --2.
 GO
 SET ANSI_NULLS ON
@@ -271,7 +270,6 @@ JOIN Term T ON T.TermID = S.TermID
 LEFT JOIN FacultyPayment FP ON FP.SectionID = S.SectionID
 LEFT JOIN CTE ON CTE.SectionID = S.SectionID
 GROUP BY T.AcademicYear
-
 
 --3.
 GO
@@ -300,7 +298,6 @@ JOIN Faculty F ON F.FacultyID = FP.FacultyID
 WHERE P.PersonID = @PersonPrimaryKey
 ORDER BY StartDate
 
-
 --4.
 GO
 SET ANSI_NULLS ON
@@ -322,5 +319,3 @@ VALUES(@PersonFirstName, @PersonLastName)
 INSERT INTO Address(AddressType, AddressLine, City, PersonID)
 SELECT @AddressAddressType, @AddressAddressLine, @AddressCity, #Person.PersonID
 FROM #Person
-
-
