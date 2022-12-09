@@ -1,3 +1,4 @@
+--Various Table Objects -> Created as Scripts -> Joined
 -- ADDRESS
 SET ANSI_NULLS ON
 GO
