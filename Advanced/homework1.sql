@@ -99,8 +99,93 @@ SELECT
     ,LastName
     ,SUM(CASE WHEN Year = 2009 THEN CTE.Total ELSE 0 END) AS Total2009
     ,SUM(CASE WHEN Year = 2011 THEN CTE.Total ELSE 0 END) AS Total2011
-FROM CTE CTE
+FROM CTE AS CTE
 GROUP BY CustomerId, LastName
 
 
 --5
+SELECT
+    C.Country
+    ,SUM(CASE WHEN YEAR(I.InvoiceDate) = 2011 THEN I.Total ELSE 0 END) AS Total2011
+    ,SUM(CASE WHEN YEAR(I.InvoiceDate) = 2012 THEN I.Total ELSE 0 END) AS Total2012
+    ,SUM(CASE WHEN YEAR(I.InvoiceDate) = 2013 THEN I.Total ELSE 0 END) AS Total2013
+    ,COUNT(DISTINCT C.CustomerId) AS UniqueCustomers
+    ,COUNT(I.InvoiceId) AS OrdersByCountry
+FROM Customer C
+JOIN Invoice I ON I.CustomerId = C.CustomerId
+WHERE YEAR(I.InvoiceDate) IN (2011, 2012, 2013)
+GROUP BY C.Country
+
+
+--6
+SELECT
+    EmployeeId
+    ,'BirthDate' AS Field
+    ,CONVERT(nvarchar(50),BirthDate,101) AS Value
+FROM Employee
+
+UNION ALL 
+
+SELECT
+    EmployeeId
+    ,'FirstName'
+    ,FirstName
+FROM Employee
+
+UNION ALL
+
+SELECT
+    EmployeeId
+    ,'LastName'
+    ,LastName
+FROM Employee
+ORDER BY EmployeeId
+
+
+--7
+SELECT E.EmployeeId, U.Field, U.Value
+FROM Employee E 
+CROSS APPLY 
+    (VALUES
+        ('BirthDate', CONVERT(nvarchar(50),BirthDate,101))
+        ,('FirstName', E.FirstName)
+        ,('LastName', E.LastName)
+) U (Field, Value)
+
+
+--8
+SELECT EmployeeId, Field, Value
+FROM (
+    SELECT
+        EmployeeId
+        ,CONVERT(nvarchar(50),BirthDate,101) AS BirthDate
+        ,CAST(FirstName AS nvarchar(50)) AS FirstName
+        ,Cast(LastName AS nvarchar(50)) AS LastName
+    From Employee
+    ) AS E
+UNPIVOT
+    (Value FOR Field IN (BirthDate, FirstName, LastName)) U
+
+
+--9
+;WITH CTE AS 
+(
+SELECT E.EmployeeId, U.Field, U.Value
+FROM Employee E 
+CROSS APPLY 
+    (VALUES
+        ('BirthDate', CONVERT(nvarchar(50),BirthDate,101))
+        ,('FirstName', E.FirstName)
+        ,('LastName', E.LastName)
+) U (Field, Value) 
+)
+SELECT
+    E.EmployeeId
+    ,MAX(CASE WHEN E.Field = 'FirstName' THEN E.Value END) AS FirstName
+    ,MAX(CASE WHEN E.Field = 'LastName' THEN E.Value END) AS LastName
+    ,MAX(CASE WHEN E.Field = 'BirthDate' THEN E.Value END) AS BirthDate
+FROM CTE E
+GROUP BY E.EmployeeId
+
+
+--10
