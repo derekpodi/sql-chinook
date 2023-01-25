@@ -36,6 +36,7 @@ JOIN Album AL ON AL.ArtistId = A.ArtistId
 CROSS APPLY (
     SELECT TOP 3 * FROM Track T
     WHERE T.AlbumId = AL.AlbumId
+    ORDER BY T.TrackId
 ) CA
 WHERE A.Name = 'Queen'
 ORDER BY AL.Title, CA.TrackId
@@ -64,27 +65,10 @@ CROSS APPLY (
 ) CA
 ORDER BY CTE.Title DESC
 
-/*
---4
-SELECT TOP 15
-    A.Name AS ArtistName
-    ,AL.Title AS AlbumTitle
-    ,CA.Name AS TrackName
-FROM Artist A 
-JOIN Album AL ON AL.ArtistId = A.ArtistId
-CROSS APPLY (
-    SELECT TOP 3 * FROM Track T
-    WHERE T.AlbumId = AL.AlbumId
-    ORDER BY T.Name DESC
-) CA
-WHERE A.Name = 'U2'
-ORDER BY AL.Title DESC
-*/
-
 
 --5
 SELECT
-    E.FirstName
+    E.FirstName AS SupportRep
     ,CA.Country
     ,CA.Total
 FROM Employee E
@@ -98,69 +82,6 @@ CROSS APPLY(
     GROUP BY C.Country
     ORDER BY Total DESC
 ) CA
-
-
-/*
---5
-SELECT 
-    E.FirstName
-    ,C.Country
-    ,SUM(I.Total)
-FROM Employee E
-JOIN Customer C ON C.SupportRepId = E.EmployeeId
-JOIN Invoice I ON I.CustomerId = C.CustomerId
-GROUP BY C.Country, E.FirstName
-ORDER BY E.FirstName, SUM(I.Total) DESC
-
-SELECT 
-    E.FirstName
-    ,C.Country
-    ,SUM(CA.Total)
-FROM Employee E
-JOIN Customer C ON C.SupportRepId = E.EmployeeId
-CROSS APPLY(
-    SELECT * FROM Invoice I WHERE I.CustomerId = C.CustomerId
-) CA 
-GROUP BY C.Country, E.FirstName
-ORDER BY E.FirstName, SUM(CA.Total) DESC
-
---5
-;WITH CTE AS (
-    SELECT
-        E.FirstName
-        ,C.Country
-        ,C.CustomerId
-    FROM Employee E
-    JOIN Customer C ON C.SupportRepId = E.EmployeeId
-)
-SELECT
-    FirstName
-    ,CTE.Country
-    ,SUM(CA.Total)
-FROM CTE
-CROSS APPLY(
-    SELECT I.Total AS Total FROM Invoice I
-    WHERE I.CustomerId = CTE.CustomerId
-) CA
-GROUP BY FirstName, CTE.Country
-ORDER BY FirstName, SUM(CA.Total) DESC, CTE.Country
-
---5
-SELECT
-    E.FirstName AS SupportRep
-    ,CA.Country
-    ,SUM(CA.Total) OVER (Partition BY CA.Country) AS Total
-FROM Employee E
-CROSS APPLY (
-    SELECT TOP 4 
-        C.*
-        ,I.Total
-    FROM Customer C
-    JOIN INVOICE I ON I.CustomerId = C.CustomerId
-    WHERE C.SupportRepId = E.EmployeeId
-    ) CA
-ORDER BY E.FirstName, CA.Country 
-*/
 
 
 --6
@@ -184,10 +105,10 @@ WHERE C.Country IN ('Denmark', 'Chile')
 SELECT
     A.ArtistId
     ,AL.AlbumId
-    ,A.Name
-    ,AL.Title
-    ,T.Name
-    ,Search
+    ,A.Name AS ArtistName
+    ,AL.Title AS AlbumTitle
+    ,T.Name AS TrackName
+    ,CA.Search
 FROM Artist A
 JOIN Album AL ON A.ArtistId = AL.ArtistId
 JOIN Track T ON T.AlbumId = AL.AlbumId
@@ -209,18 +130,19 @@ FROM Artist A
 JOIN Album AL ON AL.ArtistId = A.ArtistId
 JOIN Track T ON T.AlbumId = AL.AlbumId
 )
+, TrackPivot AS
+(
 SELECT Artist, Album, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10
-INTO #TrackPivot
 FROM CTE
 PIVOT (
     MAX(Track)
     FOR TrackNumber IN (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)
-) P
-
+    ) P
+)
 SELECT
     Search
     ,T.*
-FROM #TrackPivot T
+FROM TrackPivot T
 CROSS APPLY(
     VALUES
     (Artist), (Album), (T1), (T2), (T3), (T4), (T5), (T6), (T7), (T8), (T9), (T10)
@@ -240,19 +162,20 @@ FROM Artist A
 JOIN Album AL ON AL.ArtistId = A.ArtistId
 JOIN Track T ON T.AlbumId = AL.AlbumId
 )
+, TrackPivot AS
+(
 SELECT Artist, Album, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10
-INTO #TrackPivot
 FROM CTE
 PIVOT (
     MAX(Track)
     FOR TrackNumber IN (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)
-) P
-
+    ) P
+)
 SELECT
     Search
     ,ColumnName
     ,T.*
-FROM #TrackPivot T
+FROM TrackPivot T
 CROSS APPLY(
     VALUES
     (Artist, 'Artist')
@@ -277,7 +200,6 @@ JOIN Album AL ON AL.ArtistId = A.ArtistId
 WHERE AL.AlbumId = @AlbumId
 GO
 
-
 SELECT
     CA.*
     ,T.Name AS TrackName
@@ -287,5 +209,4 @@ CROSS APPLY(
     SELECT * FROM Album_tf(AlbumId)
 ) CA
 WHERE T.Composer LIKE '%Jackson%'
-
 
