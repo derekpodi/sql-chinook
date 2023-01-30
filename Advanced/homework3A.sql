@@ -4,113 +4,117 @@ USE Chinook
 
 
 --1
-DECLARE @Country AS varchar(25) = 'Canada'
+DECLARE @Country AS nvarchar(50)
+SET @Country = 'Canada'
 SELECT @Country AS Country
+GO
 
 
 --2
-GO
-DECLARE @Country AS varchar(25) = 'Canada'
+DECLARE @Country AS nvarchar(50)
+SET @Country = 'Canada'
 SELECT @Country AS Country1
 SET @Country = 'Mexico'
 SELECT @Country AS Country2
+GO
 
 
 --3
-DECLARE @FirstName AS varchar(25)
-        ,@LastName AS varchar(25)
-        ,@FullName AS varchar(50)
+DECLARE @FirstName AS nvarchar(25)
+        ,@LastName AS nvarchar(25)
+        ,@FullName AS nvarchar(50)
 
-SELECT @FirstName = FirstName, @LastName = LastName
+SELECT 
+    @FirstName = FirstName
+    ,@LastName = LastName
 FROM Employee
 WHERE EmployeeId = 1
-
 SET @FullName = CONCAT(@FirstName, ' ', @LastName)
-
 SELECT @FullName AS FullName
+GO
 
 
 --4
-GO
-DECLARE @FirstName AS varchar(25)
-        ,@LastName AS varchar(25)
-        ,@FullName AS varchar(50)
+DECLARE @FirstName AS nvarchar(25)
+        ,@LastName AS nvarchar(25)
+        ,@FullName AS nvarchar(50)
 
-SELECT @FirstName = FirstName, @LastName = LastName
+SELECT 
+    @FirstName = FirstName
+    ,@LastName = LastName
 FROM Employee
 WHERE EmployeeId = 1
-
 SET @FullName = CONCAT(@FirstName, ' ', @LastName)
-
 PRINT @FullName
+GO
 
 
 --5
-DECLARE @TrackName AS varchar(300)
-        ,@Composer AS varchar(50)
+DECLARE @TrackName AS nvarchar(250)
+        ,@Composer AS nvarchar(250)
 
-SELECT @TrackName = Name, @Composer = Composer
+SELECT 
+    @TrackName = Name
+    ,@Composer = Composer
 FROM Track
 WHERE TrackId = 3485
-
 SELECT @TrackName AS TrackName, @Composer AS Composer
+GO
 
 
 --6
-DECLARE @Answer AS decimal(9,2) = 1
+DECLARE @Answer AS numeric(9,2) = 1
 SET @Answer += 10
-SET @Answer -=2
-SET @Answer *=12
+SET @Answer -= 2
+SET @Answer *= 12
 SET @Answer %= 50
 SET @Answer /= 5
 SELECT @Answer AS Answer
+GO
 
 
 --7
-DECLARE @Filter AS varchar(50) = 'Hendrix'
+DECLARE @Filter AS nvarchar(250) = 'Hendrix'
 SELECT *
 FROM Track
-WHERE Composer LIKE CONCAT('%',@Filter,'%')
+WHERE Composer LIKE '%'+ @Filter + '%'
+GO
 
 
 --8
-DECLARE @Country AS varchar(25) = 'USA'
-DECLARE @CustomerIds AS table
-        (
-            ID int 
-        )
-
+DECLARE @Country AS nvarchar(50) = 'USA'
+DECLARE @CustomerIds AS table (ID int)
 INSERT INTO @CustomerIds
 SELECT CustomerId
 FROM Customer
 WHERE Country = @Country
 
 SELECT 
-    COUNT(CustomerId) AS NumberOfCustomers
+    COUNT(*) AS NumberOfCustomers
 FROM Customer 
-WHERE CustomerId IN (SELECT * FROM @CustomerIds)
+WHERE CustomerId IN (SELECT ID FROM @CustomerIds)
 
 SELECT 
-    COUNT(InvoiceId) AS NumberOfInvoices
+    COUNT(*) AS NumberOfInvoices
 FROM Invoice 
-WHERE CustomerId IN (SELECT * FROM @CustomerIds)
+WHERE CustomerId IN (SELECT ID FROM @CustomerIds)
 
 SELECT 
     MAX(Total) AS HighestInvoice
 FROM Invoice 
-WHERE CustomerId IN (SELECT * FROM @CustomerIds)
+WHERE CustomerId IN (SELECT ID FROM @CustomerIds)
+GO
 
 
 --9
 DECLARE @CustomerOrders AS table
         (
             CustomerId int
-            ,CustomerName varchar(50)
-            ,InvoiceDate DATE
-            ,Total DECIMAL(9,2)
+            ,CustomerName nvarchar(50)
+            ,InvoiceDate date
+            ,Total numeric(9,2)
         )
-
-INSERT INTO @CustomerOrders
+INSERT INTO @CustomerOrders(CustomerId, CustomerName, InvoiceDate, Total)
 SELECT 
     C.CustomerId
     ,CONCAT(C.FirstName, ' ', C.LastName) AS CustomerName
@@ -123,16 +127,18 @@ WHERE C.Country = 'Portugal'
 SELECT *
 FROM @CustomerOrders
 ORDER BY InvoiceDate
+GO
 
 
 --10
-GO
 DECLARE @SQL AS nvarchar(300)
-DECLARE @Columns AS varchar(50) = 'InvoiceId, InvoiceDate, BillingCountry'
-DECLARE @Table AS varchar(50) = 'Invoice'
-DECLARE @Filter AS varchar(50) = 'BillingCountry = ''Italy'''
+DECLARE @Columns AS nvarchar(250) = 'InvoiceId, InvoiceDate, BillingCountry'
+DECLARE @Table AS nvarchar(50) = 'Invoice'
+DECLARE @Filter AS nvarchar(50) = 'BillingCountry = ''Italy'''
 
 SET @SQL = 'SELECT ' + @Columns + ' FROM ' + @Table + ' WHERE ' + @Filter
 
 PRINT @SQL
 EXEC(@SQL)
+
+
