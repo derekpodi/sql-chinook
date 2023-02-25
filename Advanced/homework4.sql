@@ -126,18 +126,16 @@ WHERE [Begin Time] IS NOT NULL
 
 
 USE HWFull
+SELECT Name, SID FROM sys.database_principals
+    --Nancy.Edwards
+
+
+
+/*
+USE HWFull
 SELECT SUSER_SNAME(0xAEF2DD89BD54524797D0D56F419F864A)
 SELECT SUSER_SNAME()
-    --
-
-
-
-
-
-
-
-
-
+*/
 
 
 /*
