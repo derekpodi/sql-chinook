@@ -2,6 +2,7 @@
 
 USE Chinook
 
+--Rescources to import .bak files into docker container
 --https://www.quackit.com/sql_server/mac/how_to_copy_a_file_from_the_host_to_a_docker_container.cfm
 --https://www.quackit.com/sql_server/mac/how_to_restore_a_bak_file_using_azure_data_studio.cfm
 --ls ./Documents/UCSD Extension/Advanced Sql/Lesson 4/Homework 4 Backup Files
