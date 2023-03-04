@@ -2,6 +2,10 @@
 
 USE Chinook;
 
+--Import Bak File to docker container
+--cd ./
+--
+
 --1
 
 
