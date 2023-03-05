@@ -1,6 +1,21 @@
 --Derek Podimatis
 
-USE Chinook;
+--cd ./Documents/UCSD Extension/Advanced Sql/Lesson 5
+--sudo docker exec -it azuresqledge  mkdir /var/opt/mssql/backup
+--sudo docker cp StackOverFlow.bak azuresqledge:/var/opt/mssql/backup
+
+/*
+
+SQL Server caches the results of a query in memory after you run it the first time. This means the 2nd time you run it the results may display faster. This is a trick. SQL will have to work just as hard to pull the results once the memory cache clears itself. You can manually clear the memory cache yourself by executing the following code:
+CHECKPOINT
+DBCC DROPCLEANBUFFERS
+This will force the server to pull the data from disk, and allow you to see the true performance of your queries.
+I didn’t cover this in class but executing the following code will give you additional statistics on the queries you executed. It’s another way of seeing the before and after results from your index creation.
+SET STATISTICS IO ON
+*/
+--https://database.guide/how-to-view-the-query-execution-plan-in-azure-data-studio-sql-server/
+
+USE stackoverflow;
 
 /*
 1. Optimize query for Votes on July 4th, 2009
