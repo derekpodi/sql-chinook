@@ -103,5 +103,134 @@ ORDER BY Total DESC, BadgeName
 
 
 
+/*
+6. Display TOP 100 comments by score.
+       Restriction: The Text column cannot be used in an INCLUDE clause.
+       Estimated Subtree Cost Before: 763.553
+       Estimated Subtree Cost After:    0.335262
+*/
+SELECT TOP 100 *
+FROM Comments
+ORDER BY Score DESC
+
+
+--6
+
+
+
+
+
+
+
+
+
+/*
+7. Display posts with a LastActivityDate greater than 1/1/2018.
+       Restriction: The index can only contain dates greater than 1/1/2018.
+       Estimated Subtree Cost Before: 86.5618
+       Estimated Subtree Cost After:   0.0684346
+*/
+SELECT ID, Body, Title, CreationDate, LastActivityDate
+FROM Posts
+WHERE LastActivityDate > '1/1/2018'
+ORDER BY LastActivityDate
+
+
+--7
+
+
+
+
+
+
+
+
+
+
+/*
+8. Pull all posts by Justin Grant. Include the parent title for all answers.
+       Note: You can use Body and Title in an INCLUDE,
+       see if the performance improvement is worth the space used.
+       Estimated Subtree Cost Before: 112.094
+       Estimated Subtree Cost After:    0.565453
+*/
+SELECT U.DisplayName, P.Id, PT.Type, COALESCE(P.Title,PP.Title) AS Title, P.CreationDate
+, P.Body
+FROM Posts P
+LEFT JOIN Posts PP ON PP.Id = P.ParentId
+JOIN Users U ON U.ID = P.OwnerUserId
+JOIN PostTypes PT ON PT.Id = P.PostTypeId
+WHERE U.DisplayName = 'Justin Grant'
+
+
+--8
+
+
+
+
+
+
+
+
+
+/*
+9. Display titles of posts that have been linked to more than 100 times by other posts.
+       Estimated Subtree Cost Before: 90.7207
+       Estimated Subtree Cost After:  10.19
+*/
+SELECT P.Title AS SourceTitle, count(*) AS TotalLinks
+FROM PostLinks PL
+JOIN Posts P ON  P.Id = PL.RelatedPostId
+       AND P.PostTypeId = 1 --Only questions have titles.
+GROUP BY P.Title
+HAVING count(*) > 100
+ORDER BY count(*) DESC
+
+
+--9
+
+
+
+
+
+
+
+
+/*
+10. Find posts by Justin Grant that had someone vote as a "Favorite".
+       Estimated Subtree Cost Before: 203.804
+       Estimated Subtree Cost After: 0.341001
+*/
+SELECT P.Title, U.DisplayName
+FROM Posts P
+JOIN Users U ON U.Id = P.OwnerUserId
+WHERE U.DisplayName = 'Justin Grant'
+AND EXISTS(SELECT *
+    FROM Votes V
+    JOIN VoteTypes VT ON VT.Id = V.VoteTypeId
+    WHERE VT.Name = 'Favorite'
+    AND P.Id = V.PostId)
+
+
+--10
+
+
+
+
+
+
+
+
+
+/*
+11. BONUS QUESTION: Can this query be optimized? Why or why not?
+       I didn’t cover this in the lecture, so an internet search may help you find the answer.
+*/
+SELECT Title
+FROM Posts
+WHERE Title LIKE '%sql%'
+
+
+--11
 
 
