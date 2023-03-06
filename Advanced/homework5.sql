@@ -28,10 +28,8 @@ WHERE CreationDate = '7/4/2009'
 
 
 --1
-
-
-
-
+CREATE NONCLUSTERED INDEX ix_Votes_CreationDate
+       ON Votes(CreationDate)
 
 
 
@@ -47,7 +45,9 @@ WHERE Reputation > 10000
        AND Location = 'San Diego, CA'
 
 --2
-
+CREATE NONCLUSTERED INDEX ix_Users_Reputation_Location
+       ON Users(Reputation, Location)
+       INCLUDE(DisplayName)
 
 
 
@@ -66,9 +66,9 @@ WHERE Tags LIKE '%sql%'
        AND ViewCount > 1000000
 
 --3
-
-
-
+CREATE NONCLUSTERED INDEX ix_Posts_ViewCount_Tags
+       ON Posts(ViewCount, Tags)
+       INCLUDE(Title)
 
 
 
@@ -88,9 +88,13 @@ WHERE U.DisplayName = 'Justin Grant'
 ORDER BY P.CreationDate
 
 --4
+CREATE NONCLUSTERED INDEX ix_Posts_OwnerUserId_CreationDate_PostTypeId
+       ON Posts(OwnerUserId, CreationDate, PostTypeId)
+       INCLUDE(Title)
+GO
 
-
-
+CREATE NONCLUSTERED INDEX ix_Users_DisplayName_Location
+       ON Users(DisplayName, Location)
 
 
 
@@ -109,9 +113,10 @@ ORDER BY Total DESC, BadgeName
 
 
 --5
-
-
-
+--USE ix_Users_DisplayName_Location from question 4
+CREATE NONCLUSTERED INDEX ix_Badges_UserId_Name
+       ON Badges(UserId)
+       Include(Name)
 
 
 
@@ -130,7 +135,8 @@ ORDER BY Score DESC
 
 
 --6
-
+CREATE NONCLUSTERED INDEX ix_Comments_Score
+       ON Comments(Score)
 
 
 
