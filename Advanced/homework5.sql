@@ -13,6 +13,12 @@ This will force the server to pull the data from disk, and allow you to see the 
 I didn’t cover this in class but executing the following code will give you additional statistics on the queries you executed. It’s another way of seeing the before and after results from your index creation.
 SET STATISTICS IO ON
 */
+CHECKPOINT
+DBCC DROPCLEANBUFFERS
+
+SET STATISTICS IO ON
+
+
 --https://database.guide/how-to-view-the-query-execution-plan-in-azure-data-studio-sql-server/
 
 USE stackoverflow;
@@ -68,7 +74,6 @@ WHERE Tags LIKE '%sql%'
 --3
 CREATE NONCLUSTERED INDEX ix_Posts_ViewCount_Tags
        ON Posts(ViewCount, Tags)
-       INCLUDE(Title)
 
 
 
@@ -88,10 +93,9 @@ WHERE U.DisplayName = 'Justin Grant'
 ORDER BY P.CreationDate
 
 --4
-CREATE NONCLUSTERED INDEX ix_Posts_OwnerUserId_CreationDate_PostTypeId
-       ON Posts(OwnerUserId, CreationDate, PostTypeId)
-       INCLUDE(Title)
-GO
+CREATE NONCLUSTERED INDEX ix_Posts_OwnerUserId_CreationDate
+       ON Posts(OwnerUserId, CreationDate)
+       INCLUDE(Title, PostTypeId)
 
 CREATE NONCLUSTERED INDEX ix_Users_DisplayName_Location
        ON Users(DisplayName, Location)
@@ -115,8 +119,7 @@ ORDER BY Total DESC, BadgeName
 --5
 --USE ix_Users_DisplayName_Location from question 4
 CREATE NONCLUSTERED INDEX ix_Badges_UserId_Name
-       ON Badges(UserId)
-       Include(Name)
+       ON Badges(UserId, Name)
 
 
 
@@ -158,8 +161,10 @@ ORDER BY LastActivityDate
 
 
 --7
-
-
+CREATE NONCLUSTERED INDEX filter_ix_Posts_LastActivityDate
+       ON Posts(LastActivityDate)
+       INCLUDE(Body, Title, CreationDate)
+       WHERE LastActivityDate >= '1/1/2018'
 
 
 
@@ -185,8 +190,10 @@ WHERE U.DisplayName = 'Justin Grant'
 
 
 --8
-
-
+CREATE NONCLUSTERED INDEX ix_Posts_OwnerUserId
+       ON Posts(OwnerUserId)
+       --INCLUDE(Title, Body, CreationDate, PostTypeId, ParentId)
+-- Performance likely not worth the space used with the included columns
 
 
 
@@ -209,7 +216,12 @@ ORDER BY count(*) DESC
 
 
 --9
+CREATE NONCLUSTERED INDEX ix_PostLinks_RelatedPostId
+       ON PostLinks(RelatedPostId)
 
+CREATE NONCLUSTERED INDEX ix_Posts_PostTypeId
+       ON Posts(PostTypeId)
+       INCLUDE(Title)
 
 
 
@@ -234,7 +246,9 @@ AND EXISTS(SELECT *
 
 
 --10
-
+CREATE NONCLUSTERED INDEX ix_Votes_PostId
+       ON Votes(PostId)
+       INCLUDE(VoteTypeId)
 
 
 
@@ -253,5 +267,5 @@ WHERE Title LIKE '%sql%'
 
 
 --11
-
+--No, the wildcard '%' will indicate a full text scan, not a seek. 
 
