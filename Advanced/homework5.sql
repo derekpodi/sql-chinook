@@ -1,13 +1,14 @@
 --Derek Podimatis
 
 /*
+
 USE stackoverflow;
 
 CHECKPOINT
 DBCC DROPCLEANBUFFERS
 SET STATISTICS IO ON
-*/
 
+*/
 
 /*
 1. Optimize query for Votes on July 4th, 2009
